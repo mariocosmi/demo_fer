@@ -1,0 +1,43 @@
+{
+  "timestamp": "1970-01-01T00:00:00Z",
+  "data": {
+    "components": {},
+    "layouts": {
+      "solconfig": {},
+      "main": {
+        "main": {
+          "visible": { "bind": "mainvisible", "default": "true" },
+          "color": "#000000",
+          "component": "rectangle",
+          "x": 0,
+          "y": 0,
+          "z": 50,
+          "width": 600,
+          "height": 1024,
+          "children": {
+            "bodyweb": {
+              "component": "rectangle",
+              "x": 0,
+              "y": 0,
+              "width": 600,
+              "height": 1024,
+              "children": {
+                "web_view": {
+                  "component": "webview",
+                  "parent": "bodyweb",
+                  "url": { "bind": "url", "default": "http://127.0.0.1:8080/static/display/index.html", "readonly": true },
+                  "refresh": { "bind": "refresh", "default": false, "readonly": true },
+                  "width": 600,
+                  "height": 1024,
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "messages": {}
+  }
+}
