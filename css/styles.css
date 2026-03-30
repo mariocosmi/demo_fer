@@ -1,0 +1,144 @@
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Dimensioni fisse kiosk 600×1024 — nessun overflow */
+html {
+  width: 600px;
+  /* Nessuna height esplicita: body è position:fixed → html non ha contenuto in-flow.
+     Questo garantisce che document.documentElement.scrollHeight = clientHeight
+     indipendentemente dall'altezza del viewport del browser. */
+  overflow: hidden;
+}
+
+body {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 1024px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f0f4f8;
+  color: #1a2a3a;
+  font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+}
+
+/* ============================================================
+   Layout IDLE
+   ============================================================ */
+
+#area-logo {
+  padding-top: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#area-logo img {
+  width: 340px;
+  max-width: 340px;
+  max-height: 180px;
+  object-fit: contain;
+}
+
+#area-orologio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+#orologio-data {
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: #5a7a94;
+}
+
+#orologio-ora {
+  font-size: 6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: #1a2a3a;
+  line-height: 1;
+}
+
+#area-istruzione {
+  padding-bottom: 90px;
+  text-align: center;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+#area-istruzione p {
+  font-size: 1.6rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #3a5878;
+}
+
+/* ============================================================
+   Popup (overlay full-screen)
+   ============================================================ */
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 1024px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.nascosto {
+  display: none !important;
+}
+
+#popup-successo {
+  background-color: #009B3A;
+}
+
+#popup-attesa {
+  background-color: #0063AF;
+}
+
+.popup-testo {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  padding: 0 48px;
+  line-height: 1.35;
+}
+
+/* ============================================================
+   Indicatore stato connessione (fixed top-right)
+   ============================================================ */
+
+#indicatore-connessione {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 200;
+  line-height: 0;
+}
+
+#indicatore-connessione .etichetta {
+  display: none;
+}
+
+#indicatore-connessione.connected    { color: #009B3A; }
+#indicatore-connessione.reconnecting { color: #FF6600; }
+#indicatore-connessione.disconnected { color: #CC0000; }

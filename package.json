@@ -1,0 +1,19 @@
+{
+  "name": "demo-fer-validatrice",
+  "version": "1.0.0",
+  "description": "Demo validatrice biglietti ferroviari FER — test E2E con Playwright",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:idle": "playwright test idle-layout",
+    "test:us1": "playwright test us1-qr",
+    "test:us2": "playwright test us2-nfc",
+    "test:us3": "playwright test us3-connessione",
+    "test:report": "playwright show-report",
+    "server": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}

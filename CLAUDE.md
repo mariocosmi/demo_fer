@@ -83,3 +83,10 @@ After `display/0/command/setConfig` the simulator also sends `display/0/command/
 - Comments and error messages are in Italian.
 - The `.init.json` files are not versioned here; they must be provided separately before running.
 - The real application source is in `../emotikiosk-sncf`; its `CLAUDE.md` has the full architecture.
+
+## Active Technologies
+- HTML5 / CSS3 / JavaScript ES6 (vanilla) (001-validatrice-demo)
+- N/A (nessuna persistenza dati) (001-validatrice-demo)
+
+## Recent Changes
+- 001-validatrice-demo: Added HTML5 / CSS3 / JavaScript ES6 (vanilla)
