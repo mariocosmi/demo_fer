@@ -123,10 +123,16 @@
 
   // Guard: se i test chiamano aggiornaStatoConnessione() direttamente,
   // gli eventi MQTT non devono sovrascrivere per 10 secondi.
-  var _bloccaAggiornamentoMQTT = false;
-  var _timerSbloccaMQTT = null;
+  var bloccaAggiornamentoMQTT = false;
+  var timerSbloccaMQTT = null;
 
-  function _applicaStatoConnessione(nuovoStato) {
+  // Funzione pubblica esposta ai test: aggiorna l'indicatore e blocca override MQTT
+  function aggiornaStatoConnessione(nuovoStato) {
+    bloccaAggiornamentoMQTT = true;
+    if (timerSbloccaMQTT) clearTimeout(timerSbloccaMQTT);
+    timerSbloccaMQTT = setTimeout(function () {
+      bloccaAggiornamentoMQTT = false;
+    }, 10000);
     var el = document.getElementById('indicatore-connessione');
     el.classList.remove('connected', 'reconnecting', 'disconnected');
     el.classList.add(nuovoStato);
@@ -134,23 +140,13 @@
     log.info('🌐 Stato connessione: ' + nuovoStato);
   }
 
-  // Funzione pubblica esposta ai test: aggiorna e blocca override MQTT
-  function aggiornaStatoConnessione(nuovoStato) {
-    _bloccaAggiornamentoMQTT = true;
-    if (_timerSbloccaMQTT) clearTimeout(_timerSbloccaMQTT);
-    _timerSbloccaMQTT = setTimeout(function () {
-      _bloccaAggiornamentoMQTT = false;
-    }, 10000);
-    _applicaStatoConnessione(nuovoStato);
-  }
-
-  // Wrapper usato dagli handler MQTT: rispetta il blocco
-  function _aggiornaStatoConnessioneDaMQTT(nuovoStato) {
-    if (_bloccaAggiornamentoMQTT) {
+  // Usata dagli handler MQTT: non aggiorna se un test ha già impostato lo stato
+  function aggiornaStatoConnessioneDaMQTT(nuovoStato) {
+    if (bloccaAggiornamentoMQTT) {
       log.debug('🌐 Aggiornamento MQTT connessione ignorato (override test attivo)');
       return;
     }
-    _applicaStatoConnessione(nuovoStato);
+    aggiornaStatoConnessione(nuovoStato);
   }
 
   // ============================================================
@@ -168,7 +164,7 @@
 
     client.on('connect', function () {
       log.info('🟢 Connesso al broker MQTT');
-      _aggiornaStatoConnessioneDaMQTT('connected');
+      aggiornaStatoConnessioneDaMQTT('connected');
 
       var topicList = Object.values(config.topics);
       topicList.forEach(function (topic) {
@@ -189,12 +185,12 @@
 
     client.on('reconnect', function () {
       log.info('🔄 Tentativo di riconnessione...');
-      _aggiornaStatoConnessioneDaMQTT('reconnecting');
+      aggiornaStatoConnessioneDaMQTT('reconnecting');
     });
 
     client.on('close', function () {
       log.info('🔴 Connessione al broker chiusa');
-      _aggiornaStatoConnessioneDaMQTT('disconnected');
+      aggiornaStatoConnessioneDaMQTT('disconnected');
     });
 
     client.on('error', function (err) {
