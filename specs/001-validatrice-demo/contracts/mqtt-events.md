@@ -24,7 +24,7 @@ Pubblicato dal driver QR quando viene letta un'etichetta con codice a barre o QR
 Il campo `data` può contenere qualsiasi payload (il contenuto del QR, ecc.); la pagina
 lo ignora. La sola ricezione sul topic fa scattare il popup di successo.
 
-**Effetto sulla UI**: transizione → `SUCCESS`, popup "Biglietto valido, buon viaggio!".
+**Effetto sulla UI**: transizione → `SUCCESS`, popup "Biglietto valido, accesso autorizzato".
 
 ---
 
@@ -58,7 +58,7 @@ Arriva circa 300 ms dopo `validating`.
 }
 ```
 
-**Effetto sulla UI**: transizione `NFC_WAITING` → `SUCCESS`, popup "Biglietto valido, buon viaggio!".
+**Effetto sulla UI**: transizione `NFC_WAITING` → `SUCCESS`, popup "Biglietto valido, accesso autorizzato".
 
 ---
 
@@ -75,7 +75,7 @@ Pubblicato dal driver contactless in caso di errore di lettura NFC.
 ```
 
 **Effetto sulla UI**: identico a `validated` ai fini della demo — transizione
-`NFC_WAITING` → `SUCCESS`, popup "Biglietto valido, buon viaggio!".
+`NFC_WAITING` → `SUCCESS`, popup "Biglietto valido, accesso autorizzato".
 
 ---
 

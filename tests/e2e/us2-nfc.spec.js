@@ -3,7 +3,7 @@
  *
  * Verifica il flusso a due fasi:
  *   cless/0/event/validating → popup "Attendere prego..."
- *   cless/0/event/validated  → popup "Biglietto valido, buon viaggio!"
+ *   cless/0/event/validated  → popup "Biglietto valido, accesso autorizzato"
  *
  * Anche invalid_card porta al popup di successo (comportamento da demo).
  *
@@ -76,7 +76,7 @@ test('US2-06: Evento validated trasforma popup attesa in successo', async ({ pag
 
   await expect(page.locator('#popup-attesa')).not.toBeVisible();
   await expect(page.locator('#popup-successo')).toBeVisible();
-  await expect(page.locator('#popup-successo')).toContainText('Biglietto valido, buon viaggio!');
+  await expect(page.locator('#popup-successo')).toContainText('Biglietto valido, accesso autorizzato');
 });
 
 test('US2-07: Popup successo dopo validated scompare automaticamente', async ({ page }) => {
@@ -98,7 +98,7 @@ test('US2-08: Evento invalid_card trasforma popup attesa in successo (comportame
 
   await expect(page.locator('#popup-attesa')).not.toBeVisible();
   await expect(page.locator('#popup-successo')).toBeVisible();
-  await expect(page.locator('#popup-successo')).toContainText('Biglietto valido, buon viaggio!');
+  await expect(page.locator('#popup-successo')).toContainText('Biglietto valido, accesso autorizzato');
 });
 
 test('US2-09: Popup successo dopo invalid_card scompare automaticamente', async ({ page }) => {

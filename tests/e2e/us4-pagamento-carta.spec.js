@@ -3,7 +3,7 @@
  * contactless.
  *
  * Verifica il flusso:
- *   cless/0/event/huntok (con transactionid) → popup "Addebitati 1,2€, benvenuto"
+ *   cless/0/event/huntok (con transactionid) → popup "Addebitati 1,2€, accesso autorizzato"
  *   → pubblicazione cless/0/command/close con lo stesso transactionid
  *
  * Non essendo disponibile un broker MQTT reale durante i test E2E (vedi
@@ -64,7 +64,7 @@ test('US4-02: Popup pagamento contiene il testo corretto', async ({ page }) => {
     { topic: TOPIC_HUNTOK, payload: payloadHuntOk('TX-0001') }
   );
 
-  await expect(page.locator('#popup-pagamento')).toContainText('Addebitati 1,2€, benvenuto');
+  await expect(page.locator('#popup-pagamento')).toContainText('Addebitati 1,2€, accesso autorizzato');
 });
 
 test('US4-03: Popup pagamento appare entro 1 secondo dall\'evento', async ({ page }) => {

@@ -45,8 +45,8 @@ esistente in 001, ma con un popup diverso.
 
 | Stato       | Descrizione                                         | Schermo                                                        |
 |-------------|-----------------------------------------------------|-----------------------------------------------------------------|
-| SUCCESS (QR / NFC) | Lettura biglietto completata                 | Overlay popup "Biglietto valido, buon viaggio!"                 |
-| SUCCESS (pagamento) | Pagamento con carta di credito autorizzato  | Overlay popup "Addebitati 1,2€, benvenuto"                      |
+| SUCCESS (QR / NFC) | Lettura biglietto completata                 | Overlay popup "Biglietto valido, accesso autorizzato"                 |
+| SUCCESS (pagamento) | Pagamento con carta di credito autorizzato  | Overlay popup "Addebitati 1,2€, accesso autorizzato"                      |
 
 **Nuova transizione**:
 

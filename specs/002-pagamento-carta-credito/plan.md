@@ -8,7 +8,7 @@
 Estende la pagina web validatrice (già esistente da `001-validatrice-demo`) con un
 nuovo evento gestito dalla macchina a stati: `cless/0/event/huntok` (pagamento con
 carta di credito contactless autorizzato). All'evento la pagina mostra il popup
-"Addebitati 1,2€, benvenuto" e, per la prima volta in questo progetto, **pubblica**
+"Addebitati 1,2€, accesso autorizzato" e, per la prima volta in questo progetto, **pubblica**
 un messaggio MQTT (`cless/0/command/close`) per confermare al driver la chiusura della
 transazione, riportando lo stesso `transactionid` ricevuto.
 

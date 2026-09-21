@@ -23,7 +23,7 @@ autorizzato con successo.
 }
 ```
 
-**Effetto sulla UI**: transizione → `SUCCESS`, popup "Addebitati 1,2€, benvenuto".
+**Effetto sulla UI**: transizione → `SUCCESS`, popup "Addebitati 1,2€, accesso autorizzato".
 
 **Effetto lato protocollo**: la pagina pubblica `cless/0/command/close` (vedi sotto)
 riportando lo stesso `transactionid`.

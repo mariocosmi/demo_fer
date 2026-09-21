@@ -35,7 +35,7 @@ Stato interno dell'applicazione che governa cosa è visibile a schermo.
 |-------------|-----------------------------------------------------|--------------------------------------------------------------|
 | IDLE        | Nessuna lettura in corso, pagina in attesa          | Logo FER in alto — data/ora al centro — "Validare il titolo di viaggio" in basso |
 | NFC_WAITING | Carta NFC rilevata, validazione in corso            | Layout IDLE + overlay popup "Attendere prego..."             |
-| SUCCESS     | Lettura completata (QR o NFC, qualsiasi esito demo) | Layout IDLE + overlay popup "Biglietto valido, buon viaggio!" |
+| SUCCESS     | Lettura completata (QR o NFC, qualsiasi esito demo) | Layout IDLE + overlay popup "Biglietto valido, accesso autorizzato" |
 
 **Transizioni** → vedi `research.md § 4`.
 

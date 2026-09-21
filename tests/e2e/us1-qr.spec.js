@@ -31,7 +31,7 @@ test('US1-01: Popup successo appare dopo evento QR', async ({ page }) => {
 test('US1-02: Popup successo contiene il testo corretto', async ({ page }) => {
   await page.evaluate((topic) => window.gestisciEvento(topic), TOPIC_QR);
 
-  await expect(page.locator('#popup-successo')).toContainText('Biglietto valido, buon viaggio!');
+  await expect(page.locator('#popup-successo')).toContainText('Biglietto valido, accesso autorizzato');
 });
 
 test('US1-03: Popup successo appare entro 1 secondo dall\'evento', async ({ page }) => {

@@ -18,7 +18,7 @@ mosquitto_pub -h localhost -p 1883 \
 ```
 
 **Risultato atteso**:
-1. Sul monitor appare entro 1 secondo il popup "Addebitati 1,2€, benvenuto".
+1. Sul monitor appare entro 1 secondo il popup "Addebitati 1,2€, accesso autorizzato".
 2. La pagina pubblica `cless/0/command/close` con `data.transactionid = "TX-0001"`
    (verificabile sottoscrivendosi al topic con `mosquitto_sub`):
 
