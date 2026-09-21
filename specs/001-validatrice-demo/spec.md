@@ -105,8 +105,9 @@ che l'indicatore cambi stato di conseguenza.
 
 - **FR-000**: In stato IDLE la pagina DEVE mostrare:
   - in alto: il logo aziendale (`logoFER.svg`);
-  - al centro: data e ora corrente aggiornate in tempo reale;
-  - in basso: la scritta fissa "Validare il titolo di viaggio".
+  - al centro: la scritta fissa "Accesso con titolo di viaggio valido o carta di
+    credito contactless (1,2€)";
+  - in basso: data e ora corrente aggiornate in tempo reale.
 - **FR-001**: La pagina DEVE connettersi automaticamente al broker MQTT all'avvio,
   senza azione manuale dell'utente.
 - **FR-002**: La pagina DEVE sottoscriversi ai seguenti topic MQTT:

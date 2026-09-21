@@ -96,5 +96,5 @@ test('US1-07: Layout IDLE rimane in background durante il popup QR', async ({ pa
   // Il layout IDLE deve rimanere nel DOM (il popup è un overlay)
   await expect(page.locator('#area-logo')).toBeAttached();
   await expect(page.locator('#area-orologio')).toBeAttached();
-  await expect(page.locator('#area-istruzione')).toBeAttached();
+  await expect(page.locator('#area-messaggio-accesso')).toBeAttached();
 });

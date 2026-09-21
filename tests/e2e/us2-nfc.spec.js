@@ -143,5 +143,5 @@ test('US2-11: Sequenza completa validating → validated → chiusura → IDLE',
   await expect(page.locator('#popup-successo')).not.toBeVisible();
 
   // Fase 4: IDLE ripristinato
-  await expect(page.locator('#area-istruzione')).toContainText('Validare il titolo di viaggio');
+  await expect(page.locator('#area-messaggio-accesso')).toContainText('Accesso con titolo di viaggio valido');
 });

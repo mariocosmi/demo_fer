@@ -1,7 +1,7 @@
 /**
  * Test E2E — Layout IDLE
  *
- * Verifica che la pagina mostri correttamente logo, orologio e istruzione
+ * Verifica che la pagina mostri correttamente logo, messaggio di accesso e orologio
  * quando non ci sono eventi MQTT in corso.
  */
 
@@ -51,11 +51,11 @@ test('Orologio si aggiorna ogni secondo', async ({ page }) => {
   expect(ora1).not.toEqual(ora2);
 });
 
-// --- Istruzione ---
+// --- Messaggio di accesso ---
 
-test('Testo istruzione è visibile', async ({ page }) => {
-  await expect(page.locator('#area-istruzione')).toBeVisible();
-  await expect(page.locator('#area-istruzione')).toContainText('Validare il titolo di viaggio');
+test('Messaggio di accesso è visibile', async ({ page }) => {
+  await expect(page.locator('#area-messaggio-accesso')).toBeVisible();
+  await expect(page.locator('#area-messaggio-accesso')).toContainText('Accesso con titolo di viaggio valido o carta di credito contactless (1,2€)');
 });
 
 // --- Layout generale ---
