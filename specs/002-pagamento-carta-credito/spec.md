@@ -11,10 +11,10 @@
 
 Un passeggero avvicina una carta di credito contactless valida al lettore. Il
 dispositivo riconosce la carta, autorizza l'addebito e segnala l'esito positivo. La
-pagina web, aperta sul monitor di demo, rileva l'evento e mostra immediatamente un
-popup con il messaggio "Addebitati 1,2€, accesso autorizzato". Contestualmente la pagina conferma
-al dispositivo che l'esito è stato ricevuto, così la transazione può essere chiusa
-correttamente.
+pagina web, aperta sul monitor di demo, rileva l'evento e mostra immediatamente il
+messaggio di accesso (sopra l'orologio) con il testo "Addebitati 1,2€, accesso
+autorizzato" in verde. Contestualmente la pagina conferma al dispositivo che l'esito è
+stato ricevuto, così la transazione può essere chiusa correttamente.
 
 **Why this priority**: È un nuovo metodo di pagamento richiesto per completare la demo,
 al pari della validazione con QR e con tessera contactless già previste. Senza la
@@ -22,30 +22,30 @@ risposta di chiusura la transazione lato dispositivo resterebbe aperta.
 
 **Independent Test**: Può essere testata pubblicando manualmente un evento MQTT sul
 topic `cless/0/event/huntok` (con un identificativo di transazione) e verificando che:
-il popup "Addebitati 1,2€, accesso autorizzato" appaia, e che venga pubblicato un comando
-`cless/0/command/close` con lo stesso identificativo di transazione ricevuto.
+il messaggio "Addebitati 1,2€, accesso autorizzato" appaia, e che venga pubblicato un
+comando `cless/0/command/close` con lo stesso identificativo di transazione ricevuto.
 
 **Acceptance Scenarios**:
 
 1. **Given** la pagina è aperta, connessa al broker e in stato di attesa, **When** il
    lettore contactless autorizza l'addebito e pubblica l'evento `cless/0/event/huntok`
-   con un identificativo di transazione, **Then** il popup "Addebitati 1,2€, accesso autorizzato"
-   appare entro 1 secondo.
+   con un identificativo di transazione, **Then** il messaggio "Addebitati 1,2€, accesso
+   autorizzato" appare entro 1 secondo.
 2. **Given** è stato ricevuto l'evento `cless/0/event/huntok` con un identificativo di
    transazione, **When** la pagina lo elabora, **Then** viene pubblicato un comando
    `cless/0/command/close` che riporta esattamente lo stesso identificativo di
    transazione.
-3. **Given** il popup "Addebitati 1,2€, accesso autorizzato" è visibile, **When** trascorre
-   l'intervallo previsto, **Then** il popup scompare automaticamente e la pagina torna
-   allo stato di attesa.
-4. **Given** il popup "Addebitati 1,2€, accesso autorizzato" è già visibile, **When** arriva un
-   nuovo evento `cless/0/event/huntok` con un diverso identificativo di transazione,
-   **Then** il popup viene rinnovato (il timer riparte) e viene pubblicato un nuovo
-   comando `cless/0/command/close` con il nuovo identificativo.
-5. **Given** è visibile un popup relativo a un'altra modalità di validazione (QR o
+3. **Given** il messaggio "Addebitati 1,2€, accesso autorizzato" è visibile, **When**
+   trascorre l'intervallo previsto, **Then** il messaggio torna automaticamente a quello
+   di default e la pagina torna allo stato di attesa.
+4. **Given** il messaggio "Addebitati 1,2€, accesso autorizzato" è già visibile, **When**
+   arriva un nuovo evento `cless/0/event/huntok` con un diverso identificativo di
+   transazione, **Then** il timer di ripristino viene rinnovato (riparte da zero) e viene
+   pubblicato un nuovo comando `cless/0/command/close` con il nuovo identificativo.
+5. **Given** è visibile un messaggio relativo a un'altra modalità di validazione (QR o
    tessera contactless in attesa), **When** arriva l'evento `cless/0/event/huntok`,
-   **Then** il popup "Addebitati 1,2€, accesso autorizzato" sostituisce quello precedente e il
-   comando di chiusura viene comunque pubblicato correttamente.
+   **Then** il messaggio "Addebitati 1,2€, accesso autorizzato" sostituisce quello
+   precedente e il comando di chiusura viene comunque pubblicato correttamente.
 
 ---
 
@@ -59,8 +59,8 @@ il popup "Addebitati 1,2€, accesso autorizzato" appaia, e che venga pubblicato
   transazione diversi, ogni evento DEVE ricevere il proprio comando di chiusura
   corrispondente, senza perdere o scambiare gli identificativi.
 - La pubblicazione del comando `cless/0/command/close` non DEVE dipendere dal fatto che
-  il popup sia effettivamente visibile o meno: la risposta protocollare al dispositivo
-  ha priorità sulla resa grafica.
+  il messaggio sia effettivamente visibile o meno: la risposta protocollare al
+  dispositivo ha priorità sulla resa grafica.
 - Se il broker non è raggiungibile nel momento in cui arriva l'evento, il comando di
   chiusura DEVE essere inviato non appena la connessione viene ristabilita (nessuna
   perdita silenziosa della risposta).
@@ -71,18 +71,18 @@ il popup "Addebitati 1,2€, accesso autorizzato" appaia, e che venga pubblicato
 
 - **FR-001**: La pagina DEVE sottoscriversi al topic MQTT `cless/0/event/huntok`.
 - **FR-002**: A fronte dell'evento `cless/0/event/huntok`, la pagina DEVE mostrare
-  immediatamente il popup con il messaggio "Addebitati 1,2€, accesso autorizzato".
+  immediatamente il messaggio "Addebitati 1,2€, accesso autorizzato".
 - **FR-003**: A fronte dell'evento `cless/0/event/huntok`, la pagina DEVE pubblicare un
   comando `cless/0/command/close` che riporta lo stesso identificativo di transazione
   ricevuto nell'evento.
 - **FR-004**: La pubblicazione del comando `cless/0/command/close` DEVE avvenire anche
-  se, per qualsiasi motivo, il popup non viene mostrato (es. un altro popup ha priorità
-  visiva nello stesso istante).
-- **FR-005**: Il popup "Addebitati 1,2€, accesso autorizzato" DEVE chiudersi automaticamente dopo
-  un intervallo di tempo prestabilito, coerente con quello già usato per gli altri
-  popup della pagina (default: 3 secondi).
-- **FR-006**: Se un nuovo evento `cless/0/event/huntok` arriva mentre il popup di
-  pagamento è già visibile, il timer di chiusura automatica DEVE ripartire da zero.
+  se, per qualsiasi motivo, il messaggio non viene mostrato (es. un altro stato ha
+  priorità visiva nello stesso istante).
+- **FR-005**: Il messaggio "Addebitati 1,2€, accesso autorizzato" DEVE tornare
+  automaticamente a quello di default dopo un intervallo di tempo prestabilito, coerente
+  con quello già usato per gli altri stati della pagina (default: 3 secondi).
+- **FR-006**: Se un nuovo evento `cless/0/event/huntok` arriva mentre il messaggio di
+  pagamento è già visibile, il timer di ripristino automatico DEVE ripartire da zero.
 - **FR-007**: Se l'evento `cless/0/event/huntok` non contiene un identificativo di
   transazione, la pagina NON DEVE pubblicare il comando `cless/0/command/close` e DEVE
   registrare l'anomalia senza interrompere il funzionamento della pagina.
@@ -96,29 +96,30 @@ il popup "Addebitati 1,2€, accesso autorizzato" appaia, e che venga pubblicato
   `cless/0/command/close` in risposta all'evento di autorizzazione; deve riportare lo
   stesso identificativo di transazione ricevuto, per permettere al dispositivo di
   associare la risposta alla transazione corretta.
-- **Popup di pagamento**: elemento visivo temporaneo con il messaggio "Addebitati
-  1,2€, benvenuto"; si chiude automaticamente dopo l'intervallo configurato, con le
-  stesse regole di rinnovo del timer già previste per gli altri popup della pagina.
+- **Messaggio di pagamento**: stato del messaggio di accesso (sopra l'orologio) con il
+  testo "Addebitati 1,2€, accesso autorizzato" in verde; torna automaticamente al
+  messaggio di default dopo l'intervallo configurato, con le stesse regole di rinnovo
+  del timer già previste per gli altri stati della pagina.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Il popup "Addebitati 1,2€, accesso autorizzato" appare entro 1 secondo dalla
-  ricezione dell'evento `cless/0/event/huntok`.
+- **SC-001**: Il messaggio "Addebitati 1,2€, accesso autorizzato" appare entro 1 secondo
+  dalla ricezione dell'evento `cless/0/event/huntok`.
 - **SC-002**: Il 100% degli eventi `cless/0/event/huntok` con identificativo di
   transazione valido riceve un corrispondente comando `cless/0/command/close` con lo
   stesso identificativo, entro 1 secondo dalla ricezione dell'evento.
 - **SC-003**: Nessun comando di chiusura viene pubblicato con un identificativo di
   transazione errato o mancante.
-- **SC-004**: Il popup si chiude automaticamente senza alcun intervento manuale
-  dell'operatore o del passeggero.
+- **SC-004**: Il messaggio torna automaticamente a quello di default senza alcun
+  intervento manuale dell'operatore o del passeggero.
 
 ## Assumptions
 
 - Il messaggio "Addebitati 1,2€, accesso autorizzato" è un testo fisso a scopo demo, non
   calcolato dinamicamente a partire dall'importo reale della transazione (coerente con
-  gli altri popup della pagina, tutti a messaggio fisso).
+  gli altri stati della pagina, tutti a messaggio fisso).
 - L'evento `cless/0/event/huntok` viene emesso dal lettore contactless solo per
   transazioni già autorizzate positivamente; la pagina non deve quindi gestire in questo
   flusso un caso di addebito rifiutato.
@@ -127,4 +128,5 @@ il popup "Addebitati 1,2€, accesso autorizzato" appaia, e che venga pubblicato
   (`{"timestamp": "ISO8601", "data": {...}}`).
 - Questa user story si aggiunge a quelle già previste per la pagina validatrice
   (QR, tessera contactless, indicatore di connessione) e ne condivide le stesse regole
-  di comportamento del popup (durata, rinnovo del timer, priorità di sovrascrittura).
+  di comportamento del messaggio di accesso (durata, rinnovo del timer, priorità di
+  sovrascrittura).

@@ -20,13 +20,13 @@ test('US3-01: Indicatore di connessione è presente nel DOM', async ({ page }) =
   await expect(page.locator('#indicatore-connessione')).toBeAttached();
 });
 
-test('US3-02: Indicatore di connessione è sempre visibile (anche durante i popup)', async ({ page }) => {
+test('US3-02: Indicatore di connessione è sempre visibile (anche col messaggio di successo attivo)', async ({ page }) => {
   await expect(page.locator('#indicatore-connessione')).toBeVisible();
 
-  // Rimane visibile anche con popup attivo
+  // Rimane visibile anche con il messaggio di successo attivo
   await page.waitForFunction(() => typeof window.gestisciEvento === 'function');
   await page.evaluate(() => window.gestisciEvento('qr/0/event/read'));
-  await expect(page.locator('#popup-successo')).toBeVisible();
+  await expect(page.locator('#testo-messaggio-accesso')).toHaveClass(/messaggio-esito/);
   await expect(page.locator('#indicatore-connessione')).toBeVisible();
 });
 

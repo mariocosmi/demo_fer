@@ -7,7 +7,7 @@
 
 Estende la pagina web validatrice (già esistente da `001-validatrice-demo`) con un
 nuovo evento gestito dalla macchina a stati: `cless/0/event/huntok` (pagamento con
-carta di credito contactless autorizzato). All'evento la pagina mostra il popup
+carta di credito contactless autorizzato). All'evento la pagina mostra il messaggio
 "Addebitati 1,2€, accesso autorizzato" e, per la prima volta in questo progetto, **pubblica**
 un messaggio MQTT (`cless/0/command/close`) per confermare al driver la chiusura della
 transazione, riportando lo stesso `transactionid` ricevuto.
@@ -22,10 +22,10 @@ transazione, riportando lo stesso `transactionid` ricevuto.
 **Testing**: Playwright E2E (`tests/e2e/*.spec.js`), stesso framework già in uso per US1/US2/US3
 **Target Platform**: Browser desktop — Chrome, Firefox, Safari, Edge (ultime 2 versioni)
 **Project Type**: Static web page (estensione della pagina esistente)
-**Performance Goals**: Popup e comando `close` entro 1 secondo dalla ricezione dell'evento
+**Performance Goals**: Messaggio e comando `close` entro 1 secondo dalla ricezione dell'evento
 **Constraints**: Build-free, nessun server-side; deve riusare la stessa macchina a stati
-e le stesse convenzioni di popup già presenti in `js/app.js`
-**Scale/Scope**: Una nuova transizione di stato + un nuovo popup + una nuova pubblicazione MQTT
+e le stesse convenzioni del messaggio di accesso già presenti in `js/app.js`
+**Scale/Scope**: Una nuova transizione di stato + un nuovo testo del messaggio + una nuova pubblicazione MQTT
 
 ## Constitution Check
 
@@ -63,10 +63,10 @@ specs/002-pagamento-carta-credito/
 
 ```text
 demo_fer/
-├── index.html           # + nuovo elemento #popup-pagamento
+├── index.html           # invariato: riusa #testo-messaggio-accesso già esistente
 ├── config.js            # + topic clessHuntOk, + comando clessClose
 ├── css/
-│   └── styles.css       # + stile #popup-pagamento
+│   └── styles.css       # riusa la classe .messaggio-esito già esistente (verde)
 └── js/
     └── app.js           # + ramo huntok nella macchina a stati, + client.publish
 tests/e2e/
@@ -75,8 +75,12 @@ tests/e2e/
 
 **Structure Decision**: Nessuna nuova cartella o modulo: la feature si integra nei
 file esistenti di `001-validatrice-demo`, seguendo lo stesso pattern (stato →
-popup → eventualmente pubblicazione). Il client MQTT, prima solo in ascolto, ora
+messaggio → eventualmente pubblicazione). Il client MQTT, prima solo in ascolto, ora
 espone anche la capacità di pubblicare, riusando la stessa connessione.
+
+**Nota** (retroattiva): il markup a popup overlay descritto inizialmente in questo piano
+è stato sostituito da un unico messaggio testuale (sopra l'orologio) che cambia
+testo/colore, senza overlay a schermo intero — vedi `001-validatrice-demo/data-model.md`.
 
 ## Complexity Tracking
 

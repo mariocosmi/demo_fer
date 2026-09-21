@@ -24,7 +24,7 @@
 
 ## Configurazione (opzionale)
 
-Modificare `config.js` per cambiare broker, topic o durata del popup:
+Modificare `config.js` per cambiare broker, topic o durata del messaggio di esito:
 
 ```js
 window.KIOSK_CONFIG = {
@@ -35,7 +35,7 @@ window.KIOSK_CONFIG = {
     clessValidated:  'cless/0/event/validated',
     clessInvalidCard:'cless/0/event/invalid_card'
   },
-  popupDurationMs: 3000            // durata popup successo in ms
+  popupDurationMs: 3000            // durata messaggio di esito prima del ripristino a IDLE (ms)
 };
 ```
 

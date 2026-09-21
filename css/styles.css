@@ -64,7 +64,7 @@ body {
 }
 
 #orologio-ora {
-  font-size: 6rem;
+  font-size: 3rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
@@ -79,52 +79,31 @@ body {
 }
 
 #area-messaggio-accesso p {
-  font-size: 1.6rem;
+  font-size: 2.4rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #3a5878;
 }
 
-/* ============================================================
-   Popup (overlay full-screen)
-   ============================================================ */
-
-.popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 600px;
-  height: 1024px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
+/* Bordo arrotondato di rinforzo, solo negli stati di feedback (non in IDLE) */
+#area-messaggio-accesso p.messaggio-attesa,
+#area-messaggio-accesso p.messaggio-esito {
+  display: inline-block;
+  border: 3px solid currentColor;
+  border-radius: 24px;
+  padding: 16px 32px;
 }
 
-.nascosto {
-  display: none !important;
+/* Stato attesa (NFC in corso): stesso blu che prima era sfondo di #popup-attesa */
+#area-messaggio-accesso p.messaggio-attesa {
+  color: #0063AF;
 }
 
-#popup-successo {
-  background-color: #009B3A;
-}
-
-#popup-attesa {
-  background-color: #0063AF;
-}
-
-#popup-pagamento {
-  background-color: #009B3A;
-}
-
-.popup-testo {
-  font-size: 2.8rem;
-  font-weight: 700;
-  color: #ffffff;
-  text-align: center;
-  padding: 0 48px;
-  line-height: 1.35;
+/* Stato esito positivo (QR, NFC o pagamento contactless): stesso verde che
+   prima era sfondo di #popup-successo / #popup-pagamento */
+#area-messaggio-accesso p.messaggio-esito {
+  color: #009B3A;
 }
 
 /* ============================================================

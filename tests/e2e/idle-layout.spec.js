@@ -60,9 +60,8 @@ test('Messaggio di accesso è visibile', async ({ page }) => {
 
 // --- Layout generale ---
 
-test('Nessun popup è visibile in stato IDLE', async ({ page }) => {
-  await expect(page.locator('#popup-successo')).not.toBeVisible();
-  await expect(page.locator('#popup-attesa')).not.toBeVisible();
+test('In stato IDLE il messaggio non ha classe di colore attiva', async ({ page }) => {
+  await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-attesa|messaggio-esito/);
 });
 
 test('La pagina non ha scrollbar (overflow hidden)', async ({ page }) => {

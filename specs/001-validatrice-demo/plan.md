@@ -6,8 +6,9 @@
 ## Summary
 
 Pagina web statica di dimostrazione per una validatrice di biglietti ferroviari.
-Si connette al broker MQTT locale via WebSocket e mostra popup contestuali in risposta
-agli eventi dei driver QR e NFC contactless. Nessun backend, nessun build step,
+Si connette al broker MQTT locale via WebSocket e mostra un messaggio di accesso
+contestuale (testo e colore) in risposta agli eventi dei driver QR e NFC contactless.
+Nessun backend, nessun build step,
 vanilla JS + `mqtt.min.js` (da emotikiosk-sncf) + `loglevel` (da rfi-poc).
 
 ## Technical Context
@@ -62,12 +63,12 @@ demo_fer/
 ├── index.html           # Pagina principale (unico entry point)
 ├── config.js            # Configurazione broker, topic, timeout
 ├── css/
-│   └── styles.css       # Stili pagina e popup
+│   └── styles.css       # Stili pagina e messaggio di accesso
 └── js/
     ├── mqtt.min.js      # Client MQTT (copiato da emotikiosk-sncf)
     ├── loglevel.min.js  # Libreria logging (copiata da rfi-poc)
     ├── logger.js        # Wrapper logging con timestamp italiano
-    └── app.js           # Logica principale: connessione MQTT, macchina a stati, popup
+    └── app.js           # Logica principale: connessione MQTT, macchina a stati, messaggio di accesso
 ```
 
 **Structure Decision**: Singolo progetto flat al root. Nessuna cartella `src/` —

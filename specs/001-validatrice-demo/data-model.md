@@ -27,15 +27,17 @@ La pagina non ispeziona il contenuto di `data`: la sola ricezione sul topic corr
 
 ---
 
-### StatoPopup (macchina a stati)
+### StatoMessaggio (macchina a stati)
 
-Stato interno dell'applicazione che governa cosa è visibile a schermo.
+Stato interno dell'applicazione che governa testo e colore dell'unico messaggio di
+accesso sopra l'orologio (nessun overlay a schermo intero: il layout resta sempre lo
+stesso, cambia solo testo/colore del messaggio).
 
-| Stato       | Descrizione                                         | Schermo                                                      |
-|-------------|-----------------------------------------------------|--------------------------------------------------------------|
-| IDLE        | Nessuna lettura in corso, pagina in attesa          | Logo FER in alto — "Accesso con titolo di viaggio valido o carta di credito contactless (1,2€)" — data/ora in basso |
-| NFC_WAITING | Carta NFC rilevata, validazione in corso            | Layout IDLE + overlay popup "Attendere prego..."             |
-| SUCCESS     | Lettura completata (QR o NFC, qualsiasi esito demo) | Layout IDLE + overlay popup "Biglietto valido, accesso autorizzato" |
+| Stato       | Descrizione                                         | Testo del messaggio (colore)                                  |
+|-------------|-----------------------------------------------------|-----------------------------------------------------------------|
+| IDLE        | Nessuna lettura in corso, pagina in attesa          | "Accesso con titolo di viaggio valido o carta di credito contactless (1,2€)" (blu-grigio di default) |
+| NFC_WAITING | Carta NFC rilevata, validazione in corso            | "Attendere prego..." (blu `#0063AF`)                             |
+| SUCCESS     | Lettura completata (QR o NFC, qualsiasi esito demo) | "Biglietto valido, accesso autorizzato" (verde `#009B3A`)        |
 
 **Transizioni** → vedi `research.md § 4`.
 
@@ -52,7 +54,7 @@ Oggetto globale letto all'avvio. Nessuna persistenza richiesta.
 | topics.clessValidating   | string | `cless/0/event/validating`   | Topic NFC rilevata       |
 | topics.clessValidated    | string | `cless/0/event/validated`    | Topic NFC validata       |
 | topics.clessInvalidCard  | string | `cless/0/event/invalid_card` | Topic NFC errore         |
-| popupDurationMs          | number | `3000`                       | Durata popup successo    |
+| popupDurationMs          | number | `3000`                       | Durata messaggio di esito prima del ripristino a IDLE |
 
 ---
 

@@ -18,8 +18,8 @@ A differenza degli eventi già gestiti in 001 (dove `data` è ignorato), qui il 
 |-----------------|--------|--------------|-----------------------------------------------|
 | data.transactionid | string | sì (per rispondere) | Identificativo univoco della transazione autorizzata |
 
-Se `transactionid` è assente, l'evento produce comunque il popup di pagamento (FR-002)
-ma NON produce il comando `close` (FR-007).
+Se `transactionid` è assente, l'evento produce comunque il messaggio di pagamento
+(FR-002) ma NON produce il comando `close` (FR-007).
 
 ---
 
@@ -38,21 +38,21 @@ pubblica per la prima volta un messaggio.
 
 ---
 
-## StatoPopup — aggiornamento macchina a stati
+## StatoMessaggio — aggiornamento macchina a stati
 
 Nessun nuovo stato: `huntok` è una nuova transizione verso lo stato `SUCCESS` già
-esistente in 001, ma con un popup diverso.
+esistente in 001, ma con un testo del messaggio diverso (stesso colore verde).
 
-| Stato       | Descrizione                                         | Schermo                                                        |
+| Stato       | Descrizione                                         | Testo del messaggio (colore)                                     |
 |-------------|-----------------------------------------------------|-----------------------------------------------------------------|
-| SUCCESS (QR / NFC) | Lettura biglietto completata                 | Overlay popup "Biglietto valido, accesso autorizzato"                 |
-| SUCCESS (pagamento) | Pagamento con carta di credito autorizzato  | Overlay popup "Addebitati 1,2€, accesso autorizzato"                      |
+| SUCCESS (QR / NFC) | Lettura biglietto completata                 | "Biglietto valido, accesso autorizzato" (verde)                 |
+| SUCCESS (pagamento) | Pagamento con carta di credito autorizzato  | "Addebitati 1,2€, accesso autorizzato" (verde)                  |
 
 **Nuova transizione**:
 
 | Stato corrente | Evento MQTT            | Nuovo stato | Azione                                                        |
 |-----------------|------------------------|-------------|----------------------------------------------------------------|
-| qualsiasi       | `cless/0/event/huntok` | SUCCESS     | Mostra popup pagamento, avvia timer, pubblica `cless/0/command/close` con lo stesso `transactionid` |
+| qualsiasi       | `cless/0/event/huntok` | SUCCESS     | Mostra messaggio pagamento, avvia timer di ripristino, pubblica `cless/0/command/close` con lo stesso `transactionid` |
 
 ---
 

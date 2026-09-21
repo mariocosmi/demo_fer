@@ -18,7 +18,8 @@ mosquitto_pub -h localhost -p 1883 \
 ```
 
 **Risultato atteso**:
-1. Sul monitor appare entro 1 secondo il popup "Addebitati 1,2€, accesso autorizzato".
+1. Sopra l'orologio appare entro 1 secondo il messaggio "Addebitati 1,2€, accesso
+   autorizzato" (verde).
 2. La pagina pubblica `cless/0/command/close` con `data.transactionid = "TX-0001"`
    (verificabile sottoscrivendosi al topic con `mosquitto_sub`):
 
@@ -26,7 +27,8 @@ mosquitto_pub -h localhost -p 1883 \
 mosquitto_sub -h localhost -p 1883 -t 'cless/0/command/close' -v
 ```
 
-3. Il popup scompare automaticamente dopo 3 secondi (configurabile in `config.js`).
+3. Il messaggio torna automaticamente a quello di default dopo 3 secondi (configurabile
+   in `config.js`).
 
 ---
 

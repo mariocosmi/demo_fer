@@ -11,26 +11,28 @@
 
 Un passeggero avvicina il proprio biglietto cartaceo con QR code al lettore. Il dispositivo
 legge il codice e invia un evento al broker. La pagina web, aperta su un monitor di
-dimostrazione, rileva l'evento e mostra immediatamente un popup con il messaggio
-"Biglietto valido, accesso autorizzato". Il popup scompare dopo qualche secondo, pronto per
-la prossima validazione.
+dimostrazione, rileva l'evento e mostra immediatamente il messaggio di accesso (sopra
+l'orologio) con il testo "Biglietto valido, accesso autorizzato" in verde. Dopo qualche
+secondo il messaggio torna a quello di default, pronto per la prossima validazione.
 
 **Why this priority**: È il caso d'uso principale della demo e il più comune nel
 contesto ferroviario. Senza questa storia la pagina non ha valore dimostrativo.
 
 **Independent Test**: Può essere testata pubblicando manualmente un evento MQTT sul topic
-QR e verificando che il popup appaia e scompaia correttamente, senza bisogno del
-componente NFC.
+QR e verificando che il messaggio cambi e torni al default correttamente, senza bisogno
+del componente NFC.
 
 **Acceptance Scenarios**:
 
 1. **Given** la pagina è aperta e connessa al broker, **When** il lettore QR legge un
-   biglietto e pubblica l'evento, **Then** il popup "Biglietto valido, accesso autorizzato"
-   appare entro 1 secondo.
-2. **Given** il popup è visibile, **When** trascorre l'intervallo previsto, **Then** il
-   popup scompare automaticamente e la pagina torna allo stato di attesa.
+   biglietto e pubblica l'evento, **Then** il messaggio "Biglietto valido, accesso
+   autorizzato" (verde) appare entro 1 secondo.
+2. **Given** il messaggio di successo è visibile, **When** trascorre l'intervallo previsto,
+   **Then** il messaggio torna automaticamente a quello di default e la pagina torna allo
+   stato di attesa.
 3. **Given** la pagina è connessa al broker, **When** arriva un secondo evento QR mentre
-   il popup è già visibile, **Then** il popup viene rinnovato (il timer riparte).
+   il messaggio di successo è già visibile, **Then** il timer di ripristino viene rinnovato
+   (riparte da zero).
 
 ---
 
@@ -38,32 +40,35 @@ componente NFC.
 
 Un passeggero avvicina la propria tessera NFC/contactless al lettore. La validazione
 avviene in due fasi: prima il lettore rileva la carta e segnala che l'operazione è
-iniziata, poi dopo circa 300 ms comunica l'esito. Durante l'attesa la pagina mostra un
-popup "Attendere prego..."; al termine (con qualsiasi esito, anche errore) mostra il
-popup "Biglietto valido, accesso autorizzato". Ai fini della demo l'esito negativo viene
-trattato come positivo.
+iniziata, poi dopo circa 300 ms comunica l'esito. Durante l'attesa la pagina mostra il
+messaggio "Attendere prego..." (blu); al termine (con qualsiasi esito, anche errore)
+mostra il messaggio "Biglietto valido, accesso autorizzato" (verde). Ai fini della demo
+l'esito negativo viene trattato come positivo.
 
 **Why this priority**: Completa la demo con il secondo tipo di biglietto. Il flusso è
 più articolato del QR (due eventi, stato intermedio) e richiede gestione della sequenza.
 
 **Independent Test**: Può essere testata pubblicando manualmente in sequenza i due eventi
 MQTT (`cless/0/event/validating` poi `cless/0/event/validated` oppure
-`cless/0/event/invalid_card`) e verificando che i due popup appaiano nell'ordine corretto.
+`cless/0/event/invalid_card`) e verificando che il messaggio passi dai due stati
+nell'ordine corretto.
 
 **Acceptance Scenarios**:
 
 1. **Given** la pagina è connessa al broker, **When** arriva l'evento `validating`,
-   **Then** appare il popup "Attendere prego..." entro 1 secondo.
-2. **Given** il popup "Attendere prego..." è visibile, **When** arriva l'evento
-   `validated`, **Then** il popup si trasforma in "Biglietto valido, accesso autorizzato" e
-   il timer di chiusura automatica riparte.
-3. **Given** il popup "Attendere prego..." è visibile, **When** arriva l'evento
-   `invalid_card`, **Then** il popup si trasforma ugualmente in "Biglietto valido,
+   **Then** il messaggio "Attendere prego..." (blu) appare entro 1 secondo.
+2. **Given** il messaggio "Attendere prego..." è visibile, **When** arriva l'evento
+   `validated`, **Then** il messaggio si trasforma in "Biglietto valido, accesso
+   autorizzato" (verde) e il timer di ripristino automatico parte.
+3. **Given** il messaggio "Attendere prego..." è visibile, **When** arriva l'evento
+   `invalid_card`, **Then** il messaggio si trasforma ugualmente in "Biglietto valido,
    accesso autorizzato" (comportamento da demo).
-4. **Given** il popup "Biglietto valido, accesso autorizzato" è visibile (da NFC), **When**
-   trascorre l'intervallo previsto, **Then** il popup scompare automaticamente.
-5. **Given** il popup di attesa NFC è visibile, **When** arriva contemporaneamente un
-   evento QR, **Then** il popup passa direttamente a "Biglietto valido, accesso autorizzato".
+4. **Given** il messaggio "Biglietto valido, accesso autorizzato" è visibile (da NFC),
+   **When** trascorre l'intervallo previsto, **Then** il messaggio torna automaticamente
+   a quello di default.
+5. **Given** il messaggio di attesa NFC è visibile, **When** arriva contemporaneamente un
+   evento QR, **Then** il messaggio passa direttamente a "Biglietto valido, accesso
+   autorizzato".
 
 ---
 
@@ -94,8 +99,8 @@ che l'indicatore cambi stato di conseguenza.
 
 - Se il broker non è raggiungibile all'apertura della pagina, la pagina DEVE tentare
   la riconnessione automatica senza bloccarsi o mostrare errori bloccanti al passeggero.
-- Se arrivano più eventi in rapida successione, il popup viene rinnovato ad ogni evento
-  senza sovrapposizioni o duplicazioni.
+- Se arrivano più eventi in rapida successione, il timer di ripristino viene rinnovato
+  ad ogni evento senza sovrapposizioni o incoerenze di stato.
 - Il comportamento su dispositivi mobili è fuori scope: la pagina è pensata per un
   monitor desktop fisso da demo.
 
@@ -114,15 +119,16 @@ che l'indicatore cambi stato di conseguenza.
   `qr/0/event/read`, `cless/0/event/validating`, `cless/0/event/validated`,
   `cless/0/event/invalid_card`.
 - **FR-003**: A fronte dell'evento `qr/0/event/read`, la pagina DEVE mostrare
-  immediatamente il popup "Biglietto valido, accesso autorizzato".
+  immediatamente il messaggio "Biglietto valido, accesso autorizzato" (verde).
 - **FR-004**: A fronte dell'evento `cless/0/event/validating`, la pagina DEVE mostrare
-  il popup "Attendere prego..." e mantenerlo visibile finché non arriva l'esito.
+  il messaggio "Attendere prego..." (blu) e mantenerlo finché non arriva l'esito.
 - **FR-005**: A fronte degli eventi `cless/0/event/validated` o
-  `cless/0/event/invalid_card`, la pagina DEVE sostituire il popup di attesa con il
-  popup "Biglietto valido, accesso autorizzato" (in entrambi i casi, ai fini della demo).
-- **FR-006**: Il popup "Biglietto valido, accesso autorizzato" DEVE chiudersi automaticamente
-  dopo un intervallo di tempo prestabilito (default: 3 secondi).
-- **FR-007**: Se un nuovo evento di lettura arriva mentre il popup finale è visibile,
+  `cless/0/event/invalid_card`, la pagina DEVE sostituire il messaggio di attesa con il
+  messaggio "Biglietto valido, accesso autorizzato" (in entrambi i casi, ai fini della demo).
+- **FR-006**: Il messaggio "Biglietto valido, accesso autorizzato" DEVE tornare
+  automaticamente al messaggio di default dopo un intervallo di tempo prestabilito
+  (default: 3 secondi).
+- **FR-007**: Se un nuovo evento di lettura arriva mentre il messaggio finale è visibile,
   il timer DEVE ripartire da zero.
 - **FR-008**: La pagina DEVE mostrare in modo permanente un indicatore visivo dello
   stato di connessione al broker (connesso / disconnesso / in reconnessione).
@@ -134,15 +140,14 @@ che l'indicatore cambi stato di conseguenza.
 ### Key Entities
 
 - **Evento QR**: messaggio su `qr/0/event/read`; indica lettura completata, produce
-  direttamente il popup di successo.
+  direttamente il messaggio di successo.
 - **Evento NFC — validating**: messaggio su `cless/0/event/validating`; indica che la
-  carta è stata rilevata e la validazione è iniziata; produce il popup di attesa.
+  carta è stata rilevata e la validazione è iniziata; produce il messaggio di attesa.
 - **Evento NFC — esito**: messaggio su `cless/0/event/validated` o
-  `cless/0/event/invalid_card`; chiude la fase di attesa e produce il popup di successo.
-- **Popup di attesa**: elemento visivo temporaneo mostrato durante la fase NFC con il
-  messaggio "Attendere prego..."; non ha timer di chiusura autonomo.
-- **Popup di successo**: elemento visivo temporaneo con il messaggio "Biglietto valido,
-  accesso autorizzato"; si chiude automaticamente dopo l'intervallo configurato.
+  `cless/0/event/invalid_card`; chiude la fase di attesa e produce il messaggio di successo.
+- **Messaggio di accesso**: unico elemento testuale sopra l'orologio, sempre presente in
+  pagina; cambia testo e colore in base allo stato (default, attesa in blu, esito in
+  verde) invece di essere un overlay a comparsa.
 - **Indicatore di connessione**: elemento permanente in pagina che riflette lo stato
   della connessione al broker MQTT in tempo reale.
 
@@ -150,9 +155,10 @@ che l'indicatore cambi stato di conseguenza.
 
 ### Measurable Outcomes
 
-- **SC-001**: Il popup appare entro 1 secondo dalla ricezione dell'evento MQTT.
-- **SC-002**: Il popup scompare automaticamente dopo l'intervallo configurato senza
-  intervento dell'utente.
+- **SC-001**: Il messaggio di esito/attesa appare entro 1 secondo dalla ricezione
+  dell'evento MQTT.
+- **SC-002**: Il messaggio torna automaticamente a quello di default dopo l'intervallo
+  configurato senza intervento dell'utente.
 - **SC-003**: La pagina si riconnette al broker automaticamente dopo una disconnessione,
   senza ricaricare la pagina.
 - **SC-004**: Un operatore riesce ad allestire la demo (aprire la pagina e verificare
@@ -172,5 +178,5 @@ che l'indicatore cambi stato di conseguenza.
 - La configurazione (indirizzo broker, porta WebSocket, topic) può essere definita
   tramite un file di configurazione esterno o variabili dichiarate in cima allo script
   JS, senza un pannello di amministrazione dedicato.
-- Il messaggio del popup ("Biglietto valido, accesso autorizzato") è fisso e non localizzato
+- Il messaggio ("Biglietto valido, accesso autorizzato") è fisso e non localizzato
   in questa versione.

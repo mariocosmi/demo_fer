@@ -4,7 +4,7 @@
  * Logica principale:
  *  - Orologio live (aggiornaOrologio)
  *  - Connessione MQTT al broker
- *  - Macchina a stati popup (IDLE / NFC_WAITING / SUCCESS)
+ *  - Macchina a stati del messaggio di accesso (IDLE / NFC_WAITING / SUCCESS)
  *  - Indicatore stato connessione
  */
 
@@ -34,56 +34,57 @@
   }
 
   // ============================================================
-  // Popup (T009 US1, T012 US2)
+  // Messaggio di accesso (T009 US1, T012 US2)
   // ============================================================
 
-  function nascondiPopup() {
-    document.getElementById('popup-successo').classList.add('nascosto');
-    document.getElementById('popup-attesa').classList.add('nascosto');
-    document.getElementById('popup-pagamento').classList.add('nascosto');
+  var MESSAGGIO_IDLE = 'Accesso con titolo di viaggio valido o carta di credito contactless (1,2€)';
+
+  function impostaMessaggio(testo, classeColore) {
+    var el = document.getElementById('testo-messaggio-accesso');
+    el.textContent = testo;
+    el.className = classeColore || '';
+  }
+
+  function ripristinaMessaggioIdle() {
+    impostaMessaggio(MESSAGGIO_IDLE, null);
     stato = 'IDLE';
-    log.debug('🔲 Popup nascosto — stato tornato: IDLE');
+    log.debug('🔲 Messaggio di accesso ripristinato — stato tornato: IDLE');
   }
 
-  function mostraPopupSuccesso() {
+  function mostraMessaggioSuccesso() {
     if (timerPopup) {
       clearTimeout(timerPopup);
       timerPopup = null;
     }
-    document.getElementById('popup-attesa').classList.add('nascosto');
-    document.getElementById('popup-pagamento').classList.add('nascosto');
-    document.getElementById('popup-successo').classList.remove('nascosto');
-    timerPopup = setTimeout(nascondiPopup, config.popupDurationMs);
-    log.debug('✅ Popup successo mostrato — chiusura automatica tra ' + config.popupDurationMs + 'ms');
+    impostaMessaggio('Biglietto valido, accesso autorizzato', 'messaggio-esito');
+    timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
+    log.debug('✅ Messaggio successo mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
 
-  function mostraPopupPagamento() {
+  function mostraMessaggioPagamento() {
     if (timerPopup) {
       clearTimeout(timerPopup);
       timerPopup = null;
     }
-    document.getElementById('popup-attesa').classList.add('nascosto');
-    document.getElementById('popup-successo').classList.add('nascosto');
-    document.getElementById('popup-pagamento').classList.remove('nascosto');
-    timerPopup = setTimeout(nascondiPopup, config.popupDurationMs);
-    log.debug('💳 Popup pagamento mostrato — chiusura automatica tra ' + config.popupDurationMs + 'ms');
+    impostaMessaggio('Addebitati 1,2€, accesso autorizzato', 'messaggio-esito');
+    timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
+    log.debug('💳 Messaggio pagamento mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
 
-  function mostraPopupAttesa() {
+  function mostraMessaggioAttesa() {
     if (timerPopup) {
       clearTimeout(timerPopup);
       timerPopup = null;
     }
-    document.getElementById('popup-successo').classList.add('nascosto');
-    document.getElementById('popup-attesa').classList.remove('nascosto');
-    log.debug('⏳ Popup attesa mostrato');
+    impostaMessaggio('Attendere prego...', 'messaggio-attesa');
+    log.debug('⏳ Messaggio attesa mostrato');
 
     // Timeout di sicurezza: se entro 10 secondi non arriva l'esito NFC, torna in IDLE
     if (timerAttesaNFC) clearTimeout(timerAttesaNFC);
     timerAttesaNFC = setTimeout(function () {
       if (stato === 'NFC_WAITING') {
         log.info('⏱️ Timeout NFC (10s) — nessun esito ricevuto, ritorno in IDLE');
-        nascondiPopup();
+        ripristinaMessaggioIdle();
       }
     }, 10000);
   }
@@ -100,14 +101,14 @@
       if (timerAttesaNFC) { clearTimeout(timerAttesaNFC); timerAttesaNFC = null; }
       log.info('🔲 QR letto — transizione → SUCCESS');
       stato = 'SUCCESS';
-      mostraPopupSuccesso();
+      mostraMessaggioSuccesso();
 
     } else if (topic === config.topics.clessValidating) {
       // NFC rilevata: solo da IDLE → NFC_WAITING
       if (stato === 'IDLE') {
         log.info('💳 Carta NFC rilevata — transizione → NFC_WAITING');
         stato = 'NFC_WAITING';
-        mostraPopupAttesa();
+        mostraMessaggioAttesa();
       } else {
         log.debug('💳 Evento validating ignorato (stato attuale: ' + stato + ')');
       }
@@ -119,7 +120,7 @@
         var esito = topic.split('/').pop();
         log.info('💳 Esito NFC: ' + esito + ' — transizione → SUCCESS (comportamento demo)');
         stato = 'SUCCESS';
-        mostraPopupSuccesso();
+        mostraMessaggioSuccesso();
       } else {
         log.debug('💳 Evento esito NFC ignorato (stato attuale: ' + stato + ')');
       }
@@ -129,7 +130,7 @@
       if (timerAttesaNFC) { clearTimeout(timerAttesaNFC); timerAttesaNFC = null; }
       log.info('💳 Pagamento con carta di credito autorizzato — transizione → SUCCESS');
       stato = 'SUCCESS';
-      mostraPopupPagamento();
+      mostraMessaggioPagamento();
 
       var transactionId = null;
       try {
