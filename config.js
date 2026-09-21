@@ -14,7 +14,13 @@ window.KIOSK_CONFIG = {
     qrRead:          'qr/0/event/read',
     clessValidating: 'cless/0/event/validating',
     clessValidated:  'cless/0/event/validated',
-    clessInvalidCard:'cless/0/event/invalid_card'
+    clessInvalidCard:'cless/0/event/invalid_card',
+    clessHuntOk:     'cless/0/event/huntok'
+  },
+
+  // Comandi MQTT pubblicati dalla pagina (non vanno sottoscritti)
+  commands: {
+    clessClose: 'cless/0/command/close'
   },
 
   // Durata del popup di successo in millisecondi
