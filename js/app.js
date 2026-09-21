@@ -15,6 +15,7 @@
   var stato = 'IDLE';
   var timerPopup = null;
   var timerAttesaNFC = null;
+  var client = null;
 
   // ============================================================
   // Orologio live (T004)
@@ -39,6 +40,7 @@
   function nascondiPopup() {
     document.getElementById('popup-successo').classList.add('nascosto');
     document.getElementById('popup-attesa').classList.add('nascosto');
+    document.getElementById('popup-pagamento').classList.add('nascosto');
     stato = 'IDLE';
     log.debug('🔲 Popup nascosto — stato tornato: IDLE');
   }
@@ -49,9 +51,22 @@
       timerPopup = null;
     }
     document.getElementById('popup-attesa').classList.add('nascosto');
+    document.getElementById('popup-pagamento').classList.add('nascosto');
     document.getElementById('popup-successo').classList.remove('nascosto');
     timerPopup = setTimeout(nascondiPopup, config.popupDurationMs);
     log.debug('✅ Popup successo mostrato — chiusura automatica tra ' + config.popupDurationMs + 'ms');
+  }
+
+  function mostraPopupPagamento() {
+    if (timerPopup) {
+      clearTimeout(timerPopup);
+      timerPopup = null;
+    }
+    document.getElementById('popup-attesa').classList.add('nascosto');
+    document.getElementById('popup-successo').classList.add('nascosto');
+    document.getElementById('popup-pagamento').classList.remove('nascosto');
+    timerPopup = setTimeout(nascondiPopup, config.popupDurationMs);
+    log.debug('💳 Popup pagamento mostrato — chiusura automatica tra ' + config.popupDurationMs + 'ms');
   }
 
   function mostraPopupAttesa() {
@@ -77,7 +92,7 @@
   // Macchina a stati (T006)
   // ============================================================
 
-  function gestisciEvento(topic) {
+  function gestisciEvento(topic, payload) {
     log.debug('📨 Evento: ' + topic + ' | stato corrente: ' + stato);
 
     if (topic === config.topics.qrRead) {
@@ -108,7 +123,50 @@
       } else {
         log.debug('💳 Evento esito NFC ignorato (stato attuale: ' + stato + ')');
       }
+
+    } else if (topic === config.topics.clessHuntOk) {
+      // Pagamento con carta di credito autorizzato: qualunque stato → SUCCESS
+      if (timerAttesaNFC) { clearTimeout(timerAttesaNFC); timerAttesaNFC = null; }
+      log.info('💳 Pagamento con carta di credito autorizzato — transizione → SUCCESS');
+      stato = 'SUCCESS';
+      mostraPopupPagamento();
+
+      var transactionId = null;
+      try {
+        var evento = JSON.parse(payload ? payload.toString() : '{}');
+        transactionId = evento && evento.data && evento.data.transactionid;
+      } catch (e) {
+        log.warn('⚠️ Payload di ' + topic + ' non valido: ' + e.message);
+      }
+
+      if (transactionId) {
+        pubblicaChiusuraCless(transactionId);
+      } else {
+        log.warn('⚠️ Evento ' + topic + ' senza transactionid — comando close NON pubblicato');
+      }
     }
+  }
+
+  // ============================================================
+  // Pubblicazione comando di chiusura transazione cless (T008 US1)
+  // ============================================================
+
+  function pubblicaChiusuraCless(transactionId) {
+    if (!client) {
+      log.warn('⚠️ Client MQTT non pronto — impossibile pubblicare ' + config.commands.clessClose);
+      return;
+    }
+    var messaggio = {
+      timestamp: new Date().toISOString(),
+      data: { transactionid: transactionId }
+    };
+    client.publish(config.commands.clessClose, JSON.stringify(messaggio), { qos: 1 }, function (err) {
+      if (err) {
+        log.warn('⚠️ Errore pubblicazione ' + config.commands.clessClose + ': ' + err.message);
+      } else {
+        log.info('📤 Pubblicato ' + config.commands.clessClose + ' — transactionid: ' + transactionId);
+      }
+    });
   }
 
   // ============================================================
@@ -156,11 +214,12 @@
   function avviaConnessioneMQTT() {
     log.info('🔌 Connessione al broker: ' + config.broker);
 
-    var client = mqtt.connect(config.broker, {
+    client = mqtt.connect(config.broker, {
       clientId: 'validatrice_' + Math.random().toString(16).slice(2, 8),
       reconnectPeriod: 3000,
       connectTimeout: 10000
     });
+    window.mqttClient = client; // esposto solo per spy nei test E2E
 
     client.on('connect', function () {
       log.info('🟢 Connesso al broker MQTT');
@@ -180,7 +239,7 @@
 
     client.on('message', function (topic, payload) {
       log.debug('📨 Messaggio MQTT — topic: ' + topic + ' payload: ' + payload.toString().slice(0, 60));
-      gestisciEvento(topic);
+      gestisciEvento(topic, payload);
     });
 
     client.on('reconnect', function () {

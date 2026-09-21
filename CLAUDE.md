@@ -87,6 +87,7 @@ After `display/0/command/setConfig` the simulator also sends `display/0/command/
 ## Active Technologies
 - HTML5 / CSS3 / JavaScript ES6 (vanilla) (001-validatrice-demo)
 - N/A (nessuna persistenza dati) (001-validatrice-demo)
+- HTML5 / CSS3 / JavaScript ES6 (vanilla) — stesso stack di 001 (002-pagamento-carta-credito)
 
 ## Recent Changes
 - 001-validatrice-demo: Added HTML5 / CSS3 / JavaScript ES6 (vanilla)
