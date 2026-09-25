@@ -61,7 +61,7 @@ test('Messaggio di accesso è visibile', async ({ page }) => {
 // --- Layout generale ---
 
 test('In stato IDLE il messaggio non ha classe di colore attiva', async ({ page }) => {
-  await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-attesa|messaggio-esito/);
+  await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-attesa|messaggio-esito|messaggio-errore/);
 });
 
 test('La pagina non ha scrollbar (overflow hidden)', async ({ page }) => {

@@ -2,10 +2,9 @@
  * Test E2E — US2: Validazione tessera contactless (NFC)
  *
  * Verifica il flusso a due fasi sul messaggio di accesso sopra l'orologio:
- *   cless/0/event/validating → messaggio "Attendere prego..." (blu)
- *   cless/0/event/validated  → messaggio "Biglietto valido, accesso autorizzato" (verde)
- *
- * Anche invalid_card porta al messaggio di successo (comportamento da demo).
+ *   cless/0/event/validating   → messaggio "Attendere prego..." (blu)
+ *   cless/0/event/validated    → messaggio "Biglietto valido, accesso autorizzato" (verde)
+ *   cless/0/event/invalid_card → messaggio "Titolo di viaggio non valido" (rosso)
  *
  * I test simulano gli eventi MQTT via window.gestisciEvento(topic).
  */
@@ -89,26 +88,35 @@ test('US2-07: Messaggio successo dopo validated torna a IDLE automaticamente', a
   await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-esito/);
 });
 
-// --- Transizione invalid_card → successo (comportamento demo) ---
+// --- Transizione invalid_card → errore ---
 
-test('US2-08: Evento invalid_card trasforma messaggio attesa in successo (comportamento demo)', async ({ page }) => {
+test('US2-08: Evento invalid_card trasforma messaggio attesa in errore', async ({ page }) => {
   await page.evaluate((topic) => window.gestisciEvento(topic), TOPIC_VALIDATING);
   await expect(page.locator('#testo-messaggio-accesso')).toHaveClass(/messaggio-attesa/);
 
   await page.evaluate((topic) => window.gestisciEvento(topic), TOPIC_INVALID_CARD);
 
   await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-attesa/);
-  await expect(page.locator('#testo-messaggio-accesso')).toHaveClass(/messaggio-esito/);
-  await expect(page.locator('#testo-messaggio-accesso')).toContainText('Biglietto valido, accesso autorizzato');
+  await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-esito/);
+  await expect(page.locator('#testo-messaggio-accesso')).toHaveClass(/messaggio-errore/);
+  await expect(page.locator('#testo-messaggio-accesso')).toContainText('Titolo di viaggio non valido');
 });
 
-test('US2-09: Messaggio successo dopo invalid_card torna a IDLE automaticamente', async ({ page }) => {
+test('US2-08b: Evento invalid_card ignorato se non si è in attesa NFC', async ({ page }) => {
+  await page.evaluate((topic) => window.gestisciEvento(topic), TOPIC_INVALID_CARD);
+
+  await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-errore/);
+  await expect(page.locator('#testo-messaggio-accesso')).toHaveText(MESSAGGIO_IDLE);
+});
+
+test('US2-09: Messaggio errore dopo invalid_card torna a IDLE automaticamente', async ({ page }) => {
   await page.evaluate((topic) => window.gestisciEvento(topic), TOPIC_VALIDATING);
   await page.evaluate((topic) => window.gestisciEvento(topic), TOPIC_INVALID_CARD);
 
-  await expect(page.locator('#testo-messaggio-accesso')).toHaveClass(/messaggio-esito/);
+  await expect(page.locator('#testo-messaggio-accesso')).toHaveClass(/messaggio-errore/);
   await page.waitForTimeout(POPUP_DURATA_MS + 500);
-  await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-esito/);
+  await expect(page.locator('#testo-messaggio-accesso')).not.toHaveClass(/messaggio-errore/);
+  await expect(page.locator('#testo-messaggio-accesso')).toHaveText(MESSAGGIO_IDLE);
 });
 
 // --- Interruzione attesa da evento QR ---

@@ -88,7 +88,8 @@ body {
 
 /* Bordo arrotondato di rinforzo, solo negli stati di feedback (non in IDLE) */
 #area-messaggio-accesso p.messaggio-attesa,
-#area-messaggio-accesso p.messaggio-esito {
+#area-messaggio-accesso p.messaggio-esito,
+#area-messaggio-accesso p.messaggio-errore {
   display: inline-block;
   border: 3px solid currentColor;
   border-radius: 24px;
@@ -104,6 +105,12 @@ body {
    prima era sfondo di #popup-successo / #popup-pagamento */
 #area-messaggio-accesso p.messaggio-esito {
   color: #009B3A;
+}
+
+/* Stato esito negativo (NFC invalid_card): stesso rosso dell'indicatore
+   di connessione disconnesso */
+#area-messaggio-accesso p.messaggio-errore {
+  color: #CC0000;
 }
 
 /* ============================================================
