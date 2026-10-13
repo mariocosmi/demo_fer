@@ -91,3 +91,24 @@ After `display/0/command/setConfig` the simulator also sends `display/0/command/
 
 ## Recent Changes
 - 001-validatrice-demo: Added HTML5 / CSS3 / JavaScript ES6 (vanilla)
+
+## Vincoli del cliente: wiki di commessa
+
+Se la cartella `/home/mario/commesse/_vault-progetti` non esiste su questa macchina (sviluppatore senza accesso al wiki), ignora i percorsi qui sotto: chiedi all'utente le informazioni sul cliente che servono, e dichiara quando una decisione dipende da un vincolo del cliente che non hai potuto verificare.
+
+Questa demo appartiene alla commessa **FER** (Ferrovie Emilia Romagna): validatrice VTBX C100R che apre la porta della sala d'attesa con un titolo valido o un pagamento EMV contactless. Le fonti del cliente e la loro analisi non stanno in questo repository. Stanno nel vault Obsidian di commessa, che è leggibile da qui come cartella aggiuntiva (`.claude/settings.local.json`):
+
+- `/home/mario/commesse/_vault-progetti/wiki/progetti/fer/index.md`: catalogo delle pagine della commessa.
+- `/home/mario/commesse/_vault-progetti/wiki/progetti/fer/sintesi/fer-recap-interno.md`: recap della commessa, con architettura, fasi, rischi e attività aperte.
+- `/home/mario/commesse/_vault-progetti/wiki/progetti/fer/concetti/progetto-fer-validatrice-apertura-porta.md`: pagina principale del progetto.
+- `/home/mario/commesse/_vault-progetti/wiki/progetti/fer/concetti/fer-titoli-viaggio-regole-validazione-offline.md`: titoli ammessi (tessere TPER e Trenitalia, Aztec, FCB) e regole di validazione offline.
+- `/home/mario/commesse/_vault-progetti/wiki/progetti/fer/concetti/fer-interfaccia-mqtt-validatrice-sem.md`: interfaccia MQTT verso SEM (eventi di transazione, stato, comandi).
+- `/home/mario/commesse/_vault-progetti/wiki/progetti/fer/concetti/fer-integrazione-rest-centralina-porta-almaviva.md`: interfaccia REST con la centralina della porta (Almaviva).
+- `/home/mario/commesse/_vault-progetti/wiki/progetti/fer/concetti/fer-demo-interfaccia-validatrice.md`: sintesi del wiki su questa demo.
+- `/home/mario/commesse/_vault-progetti/raw/progetti/fer/`: documenti originali del cliente e di Almaviva, nelle sottocartelle datate. Servono quando la precisione conta.
+
+Regole:
+
+- Prima di decidere qualcosa che tocca un vincolo del cliente (titoli ammessi, regole di validazione, pagamento EMV, interfacce con SEM e con la centralina), leggi la pagina wiki pertinente. Se serve precisione, leggi la fonte originale. Non chiedere all'utente di copiare documenti.
+- Il vault si **legge** e basta: non modificarlo da qui. Se emerge un'informazione per il wiki, ad esempio una risposta del cliente, una contraddizione tra fonti o una decisione da tracciare, segnalala all'utente: la registrerà l'istanza di Claude che lavora sul vault.
+- I documenti di progetto (specifiche in `specs/`, contratti, data model) stanno solo in questo repository: il wiki ne riporta percorso e commit, non una copia.
