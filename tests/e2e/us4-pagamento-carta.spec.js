@@ -45,8 +45,10 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+// Solo i close: dopo la fase 2 la pagina pubblica anche il comando del suono (us5)
 async function getPublishCalls(page) {
-  return page.evaluate(() => window.__publishCalls);
+  const chiamate = await page.evaluate(() => window.__publishCalls);
+  return chiamate.filter((c) => c.topic === COMANDO_CLOSE);
 }
 
 // --- Fase 1: "Pagamento in corso..." ---

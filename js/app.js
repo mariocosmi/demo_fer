@@ -63,6 +63,7 @@
       timerPopup = null;
     }
     impostaMessaggio('Biglietto valido, accesso autorizzato', 'messaggio-esito');
+    riproduciSuono(config.audio.ok);
     timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
     log.debug('✅ Messaggio successo mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
@@ -73,6 +74,7 @@
       timerPopup = null;
     }
     impostaMessaggio('Titolo di viaggio non valido', 'messaggio-errore');
+    riproduciSuono(config.audio.ko);
     timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
     log.debug('❌ Messaggio errore mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
@@ -83,6 +85,7 @@
       timerPopup = null;
     }
     impostaMessaggio('Addebitati 1,2€, accesso autorizzato', 'messaggio-esito');
+    riproduciSuono(config.audio.ok);
     timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
     log.debug('💳 Messaggio pagamento mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
@@ -203,6 +206,32 @@
         log.warn('⚠️ Errore pubblicazione ' + config.commands.clessClose + ': ' + err.message);
       } else {
         log.info('📤 Pubblicato ' + config.commands.clessClose + ' — transactionid: ' + transactionId);
+      }
+    });
+  }
+
+  // ============================================================
+  // Suoni degli esiti
+  // ============================================================
+
+  // Chiede a system-deviced di lanciare il player. In background, perché il driver
+  // esegue il comando in modo sincrono e resterebbe occupato per la durata del suono.
+  function riproduciSuono(file) {
+    var audio = config.audio;
+    if (!audio || !audio.player || !file) return;
+    if (!client) {
+      log.warn('⚠️ Client MQTT non pronto — suono ' + file + ' non riprodotto');
+      return;
+    }
+    var messaggio = {
+      timestamp: new Date().toISOString(),
+      data: { command: audio.player + ' ' + audio.dir + '/' + file + ' >/dev/null 2>&1 &' }
+    };
+    client.publish(config.commands.systemShell, JSON.stringify(messaggio), { qos: 0 }, function (err) {
+      if (err) {
+        log.warn('⚠️ Errore pubblicazione ' + config.commands.systemShell + ': ' + err.message);
+      } else {
+        log.debug('🔊 Suono richiesto: ' + file);
       }
     });
   }

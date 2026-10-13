@@ -137,7 +137,36 @@ che l'esito è stato ricevuto e la transazione può essere chiusa.
 - client MQTT non ancora connesso (`window.mqttClient` non pronto) — in questo
   caso viene solo loggato un `warn`, senza retry automatico del comando.
 
+### `system/0/command/shell`
+
+Pubblicato quando la pagina mostra un esito, per far riprodurre il suono
+corrispondente a `system-deviced` sul validatore. La pagina non suona da sé
+perché WebKit in cog blocca l'audio finché nessuno tocca lo schermo (prova sul
+validatore 23 del 2026-10-13).
+
+| Esito mostrato                                        | Suono (`config.audio`) |
+|-------------------------------------------------------|------------------------|
+| "Biglietto valido, accesso autorizzato" (QR o NFC)    | `ok` (`sound_ok.wav`)  |
+| "Addebitati 1,2€, accesso autorizzato" (fase 2)       | `ok` (`sound_ok.wav`)  |
+| "Titolo di viaggio non valido"                        | `ko` (`sound_ko.wav`)  |
+
+**Payload**:
+```json
+{ "timestamp": "2026-10-13T16:55:28Z",
+  "data": { "command": "aplay -q /solari/emotikiosk/sounds/sound_ok.wav >/dev/null 2>&1 &" } }
+```
+
+Il comando è `<player> <dir>/<file>` da `config.audio`, in background: il
+driver lo esegue in modo sincrono e senza `&` resterebbe occupato per la durata
+del suono. Il driver risponde con `system/0/event/shell_output`
+(`exit_status`, `output`), che la pagina non sottoscrive.
+
+**QoS**: 0.
+
+**Condizioni di non pubblicazione**:
+- `config.audio.player` vuoto;
+- client MQTT non ancora connesso: solo un `warn` nel log.
+
 Tutti gli altri topic sottoscritti dalla pagina (`qr/0/event/read`,
 `cless/0/event/validating`, `cless/0/event/validated`,
-`cless/0/event/invalid_card`) non generano alcuna pubblicazione: la pagina è in
-sola lettura rispetto a essi.
+`cless/0/event/invalid_card`) generano solo il comando del suono descritto sopra.
