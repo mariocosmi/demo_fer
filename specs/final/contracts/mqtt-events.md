@@ -137,11 +137,11 @@ che l'esito è stato ricevuto e la transazione può essere chiusa.
 - client MQTT non ancora connesso (`window.mqttClient` non pronto) — in questo
   caso viene solo loggato un `warn`, senza retry automatico del comando.
 
-### `system/0/command/shell`
+### `audio/0/command/play`
 
 Pubblicato quando la pagina mostra un esito, per far riprodurre il suono
-corrispondente a `system-deviced` sul validatore. La pagina non suona da sé
-perché WebKit in cog blocca l'audio finché nessuno tocca lo schermo (prova sul
+corrispondente a emotikiosk sul validatore. La pagina non suona da sé perché
+WebKit in cog blocca l'audio finché nessuno tocca lo schermo (prova sul
 validatore 23 del 2026-10-13).
 
 | Esito mostrato                                        | Suono (`config.audio`) |
@@ -152,19 +152,19 @@ validatore 23 del 2026-10-13).
 
 **Payload**:
 ```json
-{ "timestamp": "2026-10-13T16:55:28Z",
-  "data": { "command": "aplay -q /solari/emotikiosk/sounds/sound_ok.wav >/dev/null 2>&1 &" } }
+{ "timestamp": "2026-10-14T09:30:00Z", "data": { "file": "sound_ok.wav" } }
 ```
 
-Il comando è `<player> <dir>/<file>` da `config.audio`, in background: il
-driver lo esegue in modo sincrono e senza `&` resterebbe occupato per la durata
-del suono. Il driver risponde con `system/0/event/shell_output`
-(`exit_status`, `output`), che la pagina non sottoscrive.
+`data.file` è il nome di un file nella cartella `sounds` di emotikiosk
+(`/solari/emotikiosk/sounds`); un percorso viene ridotto al solo nome.
+emotikiosk lo riproduce con `audio.player` (default `aplay -q`) e non risponde.
+Se `audio.player` è vuoto, emotikiosk ignora il comando, che resta per un
+eventuale driver audio.
 
 **QoS**: 0.
 
 **Condizioni di non pubblicazione**:
-- `config.audio.player` vuoto;
+- file dell'esito vuoto in `config.audio`;
 - client MQTT non ancora connesso: solo un `warn` nel log.
 
 Tutti gli altri topic sottoscritti dalla pagina (`qr/0/event/read`,

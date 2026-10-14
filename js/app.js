@@ -63,7 +63,7 @@
       timerPopup = null;
     }
     impostaMessaggio('Biglietto valido, accesso autorizzato', 'messaggio-esito');
-    riproduciSuono(config.audio.ok);
+    riproduciSuono(config.audio && config.audio.ok);
     timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
     log.debug('✅ Messaggio successo mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
@@ -74,7 +74,7 @@
       timerPopup = null;
     }
     impostaMessaggio('Titolo di viaggio non valido', 'messaggio-errore');
-    riproduciSuono(config.audio.ko);
+    riproduciSuono(config.audio && config.audio.ko);
     timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
     log.debug('❌ Messaggio errore mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
@@ -85,7 +85,7 @@
       timerPopup = null;
     }
     impostaMessaggio('Addebitati 1,2€, accesso autorizzato', 'messaggio-esito');
-    riproduciSuono(config.audio.ok);
+    riproduciSuono(config.audio && config.audio.ok);
     timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
     log.debug('💳 Messaggio pagamento mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
@@ -214,22 +214,20 @@
   // Suoni degli esiti
   // ============================================================
 
-  // Chiede a system-deviced di lanciare il player. In background, perché il driver
-  // esegue il comando in modo sincrono e resterebbe occupato per la durata del suono.
+  // Chiede il suono a emotikiosk, che lo riproduce dalla sua cartella sounds
   function riproduciSuono(file) {
-    var audio = config.audio;
-    if (!audio || !audio.player || !file) return;
+    if (!file) return;
     if (!client) {
       log.warn('⚠️ Client MQTT non pronto — suono ' + file + ' non riprodotto');
       return;
     }
     var messaggio = {
       timestamp: new Date().toISOString(),
-      data: { command: audio.player + ' ' + audio.dir + '/' + file + ' >/dev/null 2>&1 &' }
+      data: { file: file }
     };
-    client.publish(config.commands.systemShell, JSON.stringify(messaggio), { qos: 0 }, function (err) {
+    client.publish(config.commands.audioPlay, JSON.stringify(messaggio), { qos: 0 }, function (err) {
       if (err) {
-        log.warn('⚠️ Errore pubblicazione ' + config.commands.systemShell + ': ' + err.message);
+        log.warn('⚠️ Errore pubblicazione ' + config.commands.audioPlay + ': ' + err.message);
       } else {
         log.debug('🔊 Suono richiesto: ' + file);
       }

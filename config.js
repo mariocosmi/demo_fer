@@ -20,18 +20,16 @@ window.KIOSK_CONFIG = {
 
   // Comandi MQTT pubblicati dalla pagina (non vanno sottoscritti)
   commands: {
-    clessClose:  'cless/0/command/close',
-    systemShell: 'system/0/command/shell'
+    clessClose: 'cless/0/command/close',
+    audioPlay:  'audio/0/command/play'
   },
 
-  // Suoni degli esiti, riprodotti sul validatore da system-deviced (comando shell).
+  // Suoni degli esiti, riprodotti sul validatore da emotikiosk (cartella sounds).
   // WebKit in cog blocca l'audio della pagina senza un tocco sullo schermo, per questo
-  // la pagina non suona da sé. player vuoto = nessun suono.
+  // la pagina non suona da sé. File vuoto = nessun suono per quell'esito.
   audio: {
-    player: 'aplay -q',
-    dir:    '/solari/emotikiosk/sounds',
-    ok:     'sound_ok.wav',
-    ko:     'sound_ko.wav'
+    ok: 'sound_ok.wav',
+    ko: 'sound_ko.wav'
   },
 
   // Durata del popup di successo in millisecondi
