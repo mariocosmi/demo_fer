@@ -214,24 +214,32 @@
   // Suoni degli esiti
   // ============================================================
 
-  // Chiede il suono a emotikiosk, che lo riproduce dalla sua cartella sounds
-  function riproduciSuono(file) {
-    if (!file) return;
-    if (!client) {
-      log.warn('⚠️ Client MQTT non pronto — suono ' + file + ' non riprodotto');
-      return;
+  // Un elemento Audio per URL, precaricato così il primo play non ha ritardo
+  var suoni = {};
+
+  function caricaSuono(url) {
+    if (!url) return null;
+    if (!suoni[url]) {
+      suoni[url] = new Audio(url);
+      suoni[url].preload = 'auto';
     }
-    var messaggio = {
-      timestamp: new Date().toISOString(),
-      data: { file: file }
-    };
-    client.publish(config.commands.audioPlay, JSON.stringify(messaggio), { qos: 0 }, function (err) {
-      if (err) {
-        log.warn('⚠️ Errore pubblicazione ' + config.commands.audioPlay + ': ' + err.message);
-      } else {
-        log.debug('🔊 Suono richiesto: ' + file);
-      }
+    return suoni[url];
+  }
+
+  function riproduciSuono(url) {
+    var suono = caricaSuono(url);
+    if (!suono) return;
+    suono.currentTime = 0; // riparte da capo anche se stava già suonando
+    suono.play().then(function () {
+      log.debug('🔊 Suono riprodotto: ' + url);
+    }).catch(function (e) {
+      log.warn('⚠️ Riproduzione ' + url + ' fallita: ' + e.name + ' ' + e.message);
     });
+  }
+
+  if (config.audio) {
+    caricaSuono(config.audio.ok);
+    caricaSuono(config.audio.ko);
   }
 
   // ============================================================

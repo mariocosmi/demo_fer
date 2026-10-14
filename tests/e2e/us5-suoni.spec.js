@@ -1,21 +1,24 @@
 /**
  * Test E2E — Suoni degli esiti.
  *
- * Quando mostra un esito, la pagina pubblica audio/0/command/play con il file
- * (config.audio): sound_ok per QR letto, NFC validato e pagamento autorizzato,
- * sound_ko per carta non valida. Il suono lo riproduce emotikiosk sul validatore,
- * perché WebKit in cog blocca l'audio senza un tocco sullo schermo.
- *
- * Come in us4, publish è sostituito da uno spy ed eventi simulati con
- * window.gestisciEvento(topic, payload).
+ * Quando mostra un esito, la pagina riproduce dal browser il file di config.audio:
+ * sound_ok per QR letto, NFC validato e pagamento autorizzato, sound_ko per
+ * carta non valida. HTMLMediaElement.play è sostituito da uno spy che registra
+ * l'URL, ed eventi simulati con window.gestisciEvento(topic, payload).
  */
 
 import { test, expect } from '@playwright/test';
 
-const COMANDO_PLAY = 'audio/0/command/play';
 const PAGAMENTO_IN_CORSO_MS = 500;
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__suoni = [];
+    HTMLMediaElement.prototype.play = function () {
+      window.__suoni.push(new URL(this.src).pathname.split('/').pop());
+      return Promise.resolve();
+    };
+  });
   await page.goto('/index.html');
   await page.waitForFunction(() => typeof window.gestisciEvento === 'function' && !!window.mqttClient);
   await page.evaluate(() => {
@@ -28,10 +31,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function suoni(page) {
-  const chiamate = await page.evaluate(() => window.__publishCalls);
-  return chiamate
-    .filter((c) => c.topic === COMANDO_PLAY)
-    .map((c) => JSON.parse(c.payload).data.file);
+  return page.evaluate(() => window.__suoni);
 }
 
 async function evento(page, topic, payload) {
@@ -67,4 +67,10 @@ test('US5-05: file vuoto in config.audio disattiva il suono di quell\'esito', as
   await page.evaluate(() => { window.KIOSK_CONFIG.audio.ok = ''; });
   await evento(page, 'qr/0/event/read');
   expect(await suoni(page)).toEqual([]);
+});
+
+test('US5-06: il suono non passa più da MQTT', async ({ page }) => {
+  await evento(page, 'qr/0/event/read');
+  const topics = await page.evaluate(() => window.__publishCalls.map((c) => c.topic));
+  expect(topics).not.toContain('audio/0/command/play');
 });

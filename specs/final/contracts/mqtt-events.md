@@ -137,36 +137,20 @@ che l'esito è stato ricevuto e la transazione può essere chiusa.
 - client MQTT non ancora connesso (`window.mqttClient` non pronto) — in questo
   caso viene solo loggato un `warn`, senza retry automatico del comando.
 
-### `audio/0/command/play`
+### Suoni degli esiti (nessun topic MQTT)
 
-Pubblicato quando la pagina mostra un esito, per far riprodurre il suono
-corrispondente a emotikiosk sul validatore. La pagina non suona da sé perché
-WebKit in cog blocca l'audio finché nessuno tocca lo schermo (prova sul
-validatore 23 del 2026-10-13).
+I suoni non passano da MQTT: la pagina li riproduce dal browser con un
+elemento `Audio` precaricato, dall'URL in `config.audio`.
 
-| Esito mostrato                                        | Suono (`config.audio`) |
-|-------------------------------------------------------|------------------------|
-| "Biglietto valido, accesso autorizzato" (QR o NFC)    | `ok` (`sound_ok.wav`)  |
-| "Addebitati 1,2€, accesso autorizzato" (fase 2)       | `ok` (`sound_ok.wav`)  |
-| "Titolo di viaggio non valido"                        | `ko` (`sound_ko.wav`)  |
+| Esito mostrato                                        | Suono (`config.audio`)        |
+|-------------------------------------------------------|-------------------------------|
+| "Biglietto valido, accesso autorizzato" (QR o NFC)    | `ok` (`/static/display/sounds/sound_ok.wav`)  |
+| "Addebitati 1,2€, accesso autorizzato" (fase 2)       | `ok` (`/static/display/sounds/sound_ok.wav`)  |
+| "Titolo di viaggio non valido"                        | `ko` (`/static/display/sounds/sound_ko.wav`)  |
 
-**Payload**:
-```json
-{ "timestamp": "2026-10-14T09:30:00Z", "data": { "file": "sound_ok.wav" } }
-```
-
-`data.file` è il nome di un file nella cartella `sounds` di emotikiosk
-(`/solari/emotikiosk/sounds`); un percorso viene ridotto al solo nome.
-emotikiosk lo riproduce con `audio.player` (default `aplay -q`) e non risponde.
-Se `audio.player` è vuoto, emotikiosk ignora il comando, che resta per un
-eventuale driver audio.
-
-**QoS**: 0.
-
-**Condizioni di non pubblicazione**:
-- file dell'esito vuoto in `config.audio`;
-- client MQTT non ancora connesso: solo un `warn` nel log.
+URL vuoto in `config.audio` = nessun suono per quell'esito. Se il browser
+rifiuta il play, la pagina scrive solo un `warn` nel log.
 
 Tutti gli altri topic sottoscritti dalla pagina (`qr/0/event/read`,
 `cless/0/event/validating`, `cless/0/event/validated`,
-`cless/0/event/invalid_card`) generano solo il comando del suono descritto sopra.
+`cless/0/event/invalid_card`) non generano comandi MQTT.

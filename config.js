@@ -20,16 +20,13 @@ window.KIOSK_CONFIG = {
 
   // Comandi MQTT pubblicati dalla pagina (non vanno sottoscritti)
   commands: {
-    clessClose: 'cless/0/command/close',
-    audioPlay:  'audio/0/command/play'
+    clessClose: 'cless/0/command/close'
   },
 
-  // Suoni degli esiti, riprodotti sul validatore da emotikiosk (cartella sounds).
-  // WebKit in cog blocca l'audio della pagina senza un tocco sullo schermo, per questo
-  // la pagina non suona da sé. File vuoto = nessun suono per quell'esito.
+  // Suoni degli esiti, riprodotti dal browser. URL vuoto = nessun suono per quell'esito.
   audio: {
-    ok: 'sound_ok.wav',
-    ko: 'sound_ko.wav'
+    ok: '/static/display/sounds/sound_ok.wav',
+    ko: '/static/display/sounds/sound_ko.wav'
   },
 
   // Durata del popup di successo in millisecondi
