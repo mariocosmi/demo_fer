@@ -113,7 +113,65 @@ visibile in quel momento.
 
 ---
 
+### `cless/0/event/huntfail`
+
+Pubblicato dal lettore contactless quando un pagamento con carta di credito
+viene rifiutato. Arriva subito dopo `cless/0/event/huntend`.
+
+**Payload** (visto sul validatore):
+```json
+{ "timestamp": "20261014153103", "data": { "reason": "71", "description": "Card refused: antipassback",
+  "transactionid": "2c829a33030b0ce0c78e8f817e4635e0", "truncatedpan": "478858******0310   ", "posid": "99981451" } }
+```
+
+| Campo            | Tipo   | Descrizione                                                     |
+|------------------|--------|-----------------------------------------------------------------|
+| data.description | string | Motivo del rifiuto, da mostrare all'utente così com'è           |
+| data.reason      | string | Codice del rifiuto (es. `71` antipassback, `75` carta scaduta)   |
+
+**Effetto sulla UI**: transizione → `ERROR` (qualsiasi sia lo stato corrente),
+messaggio `data.description` in rosso, con bordo (se manca: "Pagamento non
+riuscito"), suono KO, ripristino automatico dopo `popupDurationMs`. Nessun
+comando `close`.
+
+---
+
+### `cless/0/event/huntend`
+
+Pubblicato dal lettore contactless quando l'hunt finisce: carta rilevata o tempo
+scaduto.
+
+**Payload**:
+```json
+{ "timestamp": "2026-10-14T11:30:45Z", "data": {} }
+```
+
+**Effetto sulla UI**: nessuno. Dopo `huntRetryMs` (3000 ms) la pagina, se è
+ancora in `IDLE`, ripubblica `cless/0/command/hunt`. Un nuovo `huntend` riparte
+la pausa da capo; il ritorno in `IDLE` la annulla, perché pubblica già lui l'hunt.
+
+---
+
 ## Messaggi pubblicati dalla pagina (pagina → broker)
+
+### `cless/0/command/hunt`
+
+Mette il lettore contactless in ascolto di una carta di pagamento: senza questo
+comando il driver non produce `huntok`.
+
+**Payload**:
+```json
+{ "timestamp": "2026-10-14T11:30:46Z", "data": {} }
+```
+
+**QoS**: 1.
+
+**Quando viene pubblicato**:
+- alla connessione al broker, se la pagina è in `IDLE`;
+- a ogni ritorno in `IDLE` (fine di un esito o timeout dell'attesa NFC);
+- dopo `cless/0/event/huntend`, se dopo `huntRetryMs` la pagina è ancora in `IDLE`.
+
+**Condizione di non pubblicazione**: client MQTT non ancora creato (solo un `warn`).
 
 ### `cless/0/command/close`
 

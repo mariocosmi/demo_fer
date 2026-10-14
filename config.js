@@ -15,13 +15,19 @@ window.KIOSK_CONFIG = {
     clessValidating: 'cless/0/event/validating',
     clessValidated:  'cless/0/event/validated',
     clessInvalidCard:'cless/0/event/invalid_card',
-    clessHuntOk:     'cless/0/event/huntok'
+    clessHuntOk:     'cless/0/event/huntok',
+    clessHuntEnd:    'cless/0/event/huntend',
+    clessHuntFail:   'cless/0/event/huntfail'
   },
 
   // Comandi MQTT pubblicati dalla pagina (non vanno sottoscritti)
   commands: {
+    clessHunt:  'cless/0/command/hunt',
     clessClose: 'cless/0/command/close'
   },
+
+  // Pausa prima di rimandare l'hunt dopo un huntend, per non pestare un pagamento in corso
+  huntRetryMs: 3000,
 
   // Suoni degli esiti, riprodotti dal browser. URL vuoto = nessun suono per quell'esito.
   audio: {

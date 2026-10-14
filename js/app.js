@@ -16,6 +16,7 @@
   var timerPopup = null;
   var timerAttesaNFC = null;
   var timerPagamentoInCorso = null;
+  var timerHunt = null;
   var client = null;
 
   // ============================================================
@@ -39,6 +40,8 @@
   // ============================================================
 
   var MESSAGGIO_IDLE = 'Accesso con titolo di viaggio valido o carta di credito contactless (1,2€)';
+  var MESSAGGIO_ERRORE = 'Titolo di viaggio non valido';
+  var MESSAGGIO_PAGAMENTO_FALLITO = 'Pagamento non riuscito';
   var PAGAMENTO_IN_CORSO_MS = 500;
 
   function impostaMessaggio(testo, classeColore) {
@@ -55,6 +58,9 @@
     impostaMessaggio(MESSAGGIO_IDLE, null);
     stato = 'IDLE';
     log.debug('🔲 Messaggio di accesso ripristinato — stato tornato: IDLE');
+    // L'hunt rimandato da un huntend arrivato insieme all'esito è assorbito da questo
+    if (timerHunt) { clearTimeout(timerHunt); timerHunt = null; }
+    pubblicaHunt();
   }
 
   function mostraMessaggioSuccesso() {
@@ -68,12 +74,12 @@
     log.debug('✅ Messaggio successo mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
   }
 
-  function mostraMessaggioErrore() {
+  function mostraMessaggioErrore(testo) {
     if (timerPopup) {
       clearTimeout(timerPopup);
       timerPopup = null;
     }
-    impostaMessaggio('Titolo di viaggio non valido', 'messaggio-errore');
+    impostaMessaggio(testo || MESSAGGIO_ERRORE, 'messaggio-errore');
     riproduciSuono(config.audio && config.audio.ko);
     timerPopup = setTimeout(ripristinaMessaggioIdle, config.popupDurationMs);
     log.debug('❌ Messaggio errore mostrato — ripristino automatico tra ' + config.popupDurationMs + 'ms');
@@ -185,7 +191,52 @@
       } else {
         log.warn('⚠️ Evento ' + topic + ' senza transactionid — comando close NON pubblicato');
       }
+
+    } else if (topic === config.topics.clessHuntFail) {
+      // Pagamento con carta di credito rifiutato: qualunque stato → ERROR, col
+      // messaggio del driver (data.description) in rosso
+      if (timerAttesaNFC) { clearTimeout(timerAttesaNFC); timerAttesaNFC = null; }
+      var descrizione = null;
+      try {
+        var esito = JSON.parse(payload ? payload.toString() : '{}');
+        descrizione = esito && esito.data && esito.data.description;
+      } catch (e) {
+        log.warn('⚠️ Payload di ' + topic + ' non valido: ' + e.message);
+      }
+      log.info('💳 Pagamento rifiutato (' + (descrizione || 'senza descrizione') + ') — transizione → ERROR');
+      stato = 'ERROR';
+      mostraMessaggioErrore(descrizione || MESSAGGIO_PAGAMENTO_FALLITO);
+
+    } else if (topic === config.topics.clessHuntEnd) {
+      // Hunt finito (carta rilevata o tempo scaduto): se siamo ancora in IDLE il POS
+      // va rimesso in ascolto, dopo una pausa per non pestare un pagamento in corso
+      if (timerHunt) clearTimeout(timerHunt);
+      timerHunt = setTimeout(function () {
+        timerHunt = null;
+        if (stato === 'IDLE') pubblicaHunt();
+      }, config.huntRetryMs);
     }
+  }
+
+  // ============================================================
+  // Comando di hunt del POS
+  // ============================================================
+
+  // Il driver cless aspetta una carta di pagamento solo dopo cless/0/command/hunt:
+  // si manda alla connessione, a ogni ritorno in IDLE e dopo un huntend in IDLE.
+  function pubblicaHunt() {
+    if (!client) {
+      log.warn('⚠️ Client MQTT non pronto — impossibile pubblicare ' + config.commands.clessHunt);
+      return;
+    }
+    var messaggio = { timestamp: new Date().toISOString(), data: {} };
+    client.publish(config.commands.clessHunt, JSON.stringify(messaggio), { qos: 1 }, function (err) {
+      if (err) {
+        log.warn('⚠️ Errore pubblicazione ' + config.commands.clessHunt + ': ' + err.message);
+      } else {
+        log.info('📤 Pubblicato ' + config.commands.clessHunt);
+      }
+    });
   }
 
   // ============================================================
@@ -308,6 +359,8 @@
           }
         });
       });
+
+      if (stato === 'IDLE') pubblicaHunt();
     });
 
     client.on('message', function (topic, payload) {
