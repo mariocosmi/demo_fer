@@ -198,7 +198,9 @@ che l'esito è stato ricevuto e la transazione può essere chiusa.
 ### Suoni degli esiti (nessun topic MQTT)
 
 I suoni non passano da MQTT: la pagina li riproduce dal browser con un
-elemento `Audio` precaricato, dall'URL in `config.audio`.
+elemento `Audio` nuovo a ogni esito, dall'URL in `config.audio`. Un elemento
+riusato non va bene: su WPE, dopo 5 minuti fermo, perde i dati scaricati e
+`play()` si risolve senza suonare.
 
 | Esito mostrato                                        | Suono (`config.audio`)        |
 |-------------------------------------------------------|-------------------------------|

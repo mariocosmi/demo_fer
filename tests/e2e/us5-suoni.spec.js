@@ -14,8 +14,10 @@ const PAGAMENTO_IN_CORSO_MS = 500;
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.__suoni = [];
+    window.__elementi = [];
     HTMLMediaElement.prototype.play = function () {
       window.__suoni.push(new URL(this.src).pathname.split('/').pop());
+      window.__elementi.push(this);
       return Promise.resolve();
     };
   });
@@ -67,6 +69,15 @@ test('US5-05: file vuoto in config.audio disattiva il suono di quell\'esito', as
   await page.evaluate(() => { window.KIOSK_CONFIG.audio.ok = ''; });
   await evento(page, 'qr/0/event/read');
   expect(await suoni(page)).toEqual([]);
+});
+
+// Su WPE un elemento Audio fermo da 5 minuti perde i dati scaricati e play()
+// si risolve senza suonare: ogni esito deve usare un elemento nuovo
+test('US5-07: ogni esito riproduce il suono con un elemento Audio nuovo', async ({ page }) => {
+  await evento(page, 'qr/0/event/read');
+  await evento(page, 'qr/0/event/read');
+  expect(await suoni(page)).toEqual(['sound_ok.wav', 'sound_ok.wav']);
+  expect(await page.evaluate(() => window.__elementi[0] !== window.__elementi[1])).toBe(true);
 });
 
 test('US5-06: il suono non passa più da MQTT', async ({ page }) => {

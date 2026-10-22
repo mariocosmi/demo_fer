@@ -265,32 +265,16 @@
   // Suoni degli esiti
   // ============================================================
 
-  // Un elemento Audio per URL, precaricato così il primo play non ha ritardo
-  var suoni = {};
-
-  function caricaSuono(url) {
-    if (!url) return null;
-    if (!suoni[url]) {
-      suoni[url] = new Audio(url);
-      suoni[url].preload = 'auto';
-    }
-    return suoni[url];
-  }
-
+  // Un elemento Audio nuovo a ogni esito: su WPE un elemento fermo da 5 minuti
+  // perde i dati scaricati e play() si risolve senza suonare
   function riproduciSuono(url) {
-    var suono = caricaSuono(url);
-    if (!suono) return;
-    suono.currentTime = 0; // riparte da capo anche se stava già suonando
+    if (!url) return;
+    var suono = new Audio(url);
     suono.play().then(function () {
       log.debug('🔊 Suono riprodotto: ' + url);
     }).catch(function (e) {
       log.warn('⚠️ Riproduzione ' + url + ' fallita: ' + e.name + ' ' + e.message);
     });
-  }
-
-  if (config.audio) {
-    caricaSuono(config.audio.ok);
-    caricaSuono(config.audio.ko);
   }
 
   // ============================================================
